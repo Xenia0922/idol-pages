@@ -5,7 +5,7 @@
  *           → { photos:[{id,url,member,featured}], featured:[...], isAdmin }
  *             photos 来自独立的 gallery_photos 表（首次自动从成员简介九宫格
  *             复制一份快照 + 合并原 gallery_extras），之后与 members.gallery 完全解耦。
- *             featured 为精选照片列表（featured=1），前台展示"骑士团精选"板块。
+ *             featured 为精选照片列表（featured=1），前台展示"粉丝精选"板块。
  *             isAdmin 仅当请求带正确 x-admin-code 时为 true（供前台决定是否显示增删控件）
  *
  *   POST   /api/gallery  （需 ADMIN_CODE） body { url,member } → 新增一张画廊照片

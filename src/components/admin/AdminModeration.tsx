@@ -10,9 +10,9 @@ interface Photo {
 }
 
 const MEMBER_LABEL: Record<string, string> = {
-  hakusai: '💛 白菜',
-  kumo: '💙 云团',
-  yuzi: '💚 柚子',
+  'member-a': '💗 成员A',
+  'member-b': '💙 成员B',
+  'member-c': '💚 成员C',
   other: '⭐ 多人/其他',
 };
 

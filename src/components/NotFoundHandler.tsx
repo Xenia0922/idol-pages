@@ -25,7 +25,7 @@ export default function NotFoundHandler() {
       <div>
         <p className="text-8xl font-extrabold text-pink-200 mb-4">404</p>
         <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">页面未找到</h1>
-        <p className="text-gray-400 mb-8">公主们不在这里，返回首页吧</p>
+        <p className="text-gray-400 mb-8">页面未找到，返回首页吧</p>
         <div className="flex justify-center gap-3">
           <a href="/" className="btn-pink">返回首页</a>
           <a href="/schedule" className="btn-outline">演出日程</a>

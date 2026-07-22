@@ -3,9 +3,9 @@ import { useEvents } from '../useEvents';
 
 const MEMBER_OPTS = [
   { id: '', label: '无 / 其他' },
-  { id: 'hakusai', label: '💛 白菜' },
-  { id: 'kumo', label: '💙 云团' },
-  { id: 'yuzi', label: '💚 柚子' },
+  { id: 'member-a', label: '💗 成员A' },
+  { id: 'member-b', label: '💙 成员B' },
+  { id: 'member-c', label: '💚 成员C' },
   { id: 'other', label: '⭐ 其他' },
 ];
 
@@ -48,7 +48,7 @@ export default function AdminMessages({ code }: { code: string }) {
   const save = async () => {
     if (!form.message.trim()) { setErr('内容必填'); return; }
     setErr('');
-    const body = { name: form.name.trim() || '匿名骑士', message: form.message.trim(), member: form.member || null, event: form.event || null };
+    const body = { name: form.name.trim() || '匿名粉丝', message: form.message.trim(), member: form.member || null, event: form.event || null };
     try {
       const isNew = !editing || editing.id === 'new';
       const res = await fetch('/api/messages', {

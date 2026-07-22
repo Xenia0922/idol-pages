@@ -42,7 +42,7 @@ async function ensureTable(env) {
           '公主风王道系地下偶像团体',
           '微博转发关注抽 52 元偶活基金',
           '查看详情 →',
-          'https://weibo.com/7972735157/R7KNSzPdt',
+          '',
           '2026-08-10',
           1,
           0,

@@ -28,7 +28,7 @@ async function postMessage(request, env) {
   try {
     const body = await request.json();
     const isAdmin = adminOk(request, env);
-    const name = body.name?.trim().slice(0, 30) || '匿名骑士';
+    const name = body.name?.trim().slice(0, 30) || '匿名粉丝';
     const message = body.message?.trim().slice(0, 500);
     const member = body.member || null;
     const event = body.event?.trim().slice(0, 40) || null;

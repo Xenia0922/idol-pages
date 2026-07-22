@@ -8,7 +8,7 @@
  *   - event           日程详情页 /schedule/:id（含 body，供 EventDetail 直接渲染，免 fetch）
  *   - members         首页 / 成员
  *   - galleryPhotos   画廊（成员分组图）
- *   - featuredFan     画廊「骑士团精选」区（已由 R2 解析出 url，免二次 fetch）
+ *   - featuredFan     画廊「粉丝精选」区（已由 R2 解析出 url，免二次 fetch）
  */
 import { ensureEvents } from './_seed.js';
 import { listPhotosData } from './api/photos.js';
@@ -121,7 +121,7 @@ async function fetchPageData(path, env) {
     } catch {}
   }
 
-  // 画廊页需要 gallery photos + 骑士团精选（已解析 url，免二次 fetch）
+  // 画廊页需要 gallery photos + 粉丝精选（已解析 url，免二次 fetch）
   if (path === '/gallery') {
     try {
       const { results } = await env.DB

@@ -104,7 +104,7 @@ export default function AdminMembers({ code }: { code: string }) {
         </h3>
         <div className="grid grid-cols-2 gap-3">
           <Field label="ID（slug，新建必填）">
-            <input disabled={editing.id !== 'new'} value={form.id || ''} onChange={e => set('id', e.target.value.trim().toLowerCase())} placeholder="如 yuzi" className={INPUT} />
+            <input disabled={editing.id !== 'new'} value={form.id || ''} onChange={e => set('id', e.target.value.trim().toLowerCase())} placeholder="如 member-a" className={INPUT} />
           </Field>
           <Field label="名称">
             <input value={form.name || ''} onChange={e => set('name', e.target.value)} className={INPUT} />

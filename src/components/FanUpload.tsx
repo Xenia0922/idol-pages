@@ -4,9 +4,9 @@ import Turnstile from './Turnstile';
 
 // 默认成员列表（SSR 未注入时的 fallback）
 const FALLBACK_MEMBERS = [
-  { id: 'hakusai', emoji: '💛', name: '白菜', color: '#C99A00' },
-  { id: 'kumo', emoji: '💙', name: '云团', color: '#2F6FED' },
-  { id: 'yuzi', emoji: '💚', name: '柚子', color: '#1E9E6A' },
+  { id: 'member-a', emoji: '💗', name: '成员A', color: '#C94D7A' },
+  { id: 'member-b', emoji: '💙', name: '成员B', color: '#2F6FED' },
+  { id: 'member-c', emoji: '💚', name: '成员C', color: '#1E9E6A' },
   { id: 'other', emoji: '⭐', name: '多人/其他', color: '#e83e8c' },
 ];
 
@@ -90,7 +90,7 @@ export default function FanUpload() {
     const fd = new FormData();
     items.forEach(it => fd.append('files', it.file));
     fd.append('member', member);
-    fd.append('nickname', nickname || '匿名骑士');
+    fd.append('nickname', nickname || '匿名粉丝');
     fd.append('event', event);
     if (turnstileToken) fd.append('turnstileToken', turnstileToken);
     try {

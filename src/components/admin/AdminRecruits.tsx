@@ -292,7 +292,7 @@ export default function AdminRecruits({ code }: Props) {
           />
           <input
             value={form.subtitle} onChange={e => setForm({ ...form, subtitle: e.target.value })}
-            placeholder="副标题（如：公主风王道系地下偶像团体）" className={INPUT_CLS}
+            placeholder="副标题（如：你的团体简介标语）" className={INPUT_CLS}
           />
           <textarea
             value={form.body} onChange={e => setForm({ ...form, body: e.target.value })}

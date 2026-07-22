@@ -7,9 +7,9 @@ import Turnstile from './Turnstile';
 
 // 默认成员列表（SSR 未注入时的 fallback）
 const FALLBACK_MEMBERS = [
-  { id: 'hakusai', emoji: '💛', name: '白菜', color: '#C99A00' },
-  { id: 'kumo', emoji: '💙', name: '云团', color: '#2F6FED' },
-  { id: 'yuzi', emoji: '💚', name: '柚子', color: '#1E9E6A' },
+  { id: 'member-a', emoji: '💗', name: '成员A', color: '#C94D7A' },
+  { id: 'member-b', emoji: '💙', name: '成员B', color: '#2F6FED' },
+  { id: 'member-c', emoji: '💚', name: '成员C', color: '#1E9E6A' },
   { id: null as string | null, emoji: '⭐', name: '全员', color: '#e83e8c' },
 ];
 
@@ -124,7 +124,7 @@ export default function MessageBoard({ readonly }: { readonly?: boolean }) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          name: name.trim() || '匿名骑士',
+          name: name.trim() || '匿名粉丝',
           message: text.trim(),
           member,
           event: event || null,
@@ -152,7 +152,7 @@ export default function MessageBoard({ readonly }: { readonly?: boolean }) {
     return `${d.getMonth() + 1}/${d.getDate()} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
   };
 
-  const NAMED = ['hakusai', 'kumo', 'yuzi'];
+  const NAMED = ['member-a', 'member-b', 'member-c'];
   const visibleMessages = messages.filter(m =>
     (!filter || (filter === 'other' ? !NAMED.includes(m.member ?? '') : m.member === filter)) &&
     (!eventFilter || m.event === eventFilter)

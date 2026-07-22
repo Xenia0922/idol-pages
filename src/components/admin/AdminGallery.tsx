@@ -11,9 +11,9 @@ interface Photo {
 }
 
 const MEMBER_OPTS = [
-  { id: 'hakusai', label: '💛 白菜' },
-  { id: 'kumo', label: '💙 云团' },
-  { id: 'yuzi', label: '💚 柚子' },
+  { id: 'member-a', label: '💗 成员A' },
+  { id: 'member-b', label: '💙 成员B' },
+  { id: 'member-c', label: '💚 成员C' },
   { id: 'other', label: '⭐ 其他' },
 ];
 

@@ -79,7 +79,7 @@ export default function GalleryGrid() {
       const siteData = await siteRes.json();
 
       if (Array.isArray(galleryData.photos)) {
-        // 排除已同步到 gallery 的精选照片（它们在底部骑士团精选区展示）
+        // 排除已同步到 gallery 的精选照片（它们在底部粉丝精选区展示）
         const raw = siteData.featured_square || [];
         const featuredGalleryIds = new Set<string>();
         if (Array.isArray(raw)) {
@@ -251,11 +251,11 @@ export default function GalleryGrid() {
         </div>
       </SkeletonSwap>
 
-      {/* 骑士团精选 — 来自广场返图 */}
+      {/* 粉丝精选 — 来自广场返图 */}
       {!loading && visibleFeaturedFan.length > 0 && (
         <div className="mt-12">
           <div className="flex items-center gap-3 mb-4">
-            <span className="text-sm font-bold text-[var(--accent)]">骑士团精选</span>
+            <span className="text-sm font-bold text-[var(--accent)]">粉丝精选</span>
             <span className="text-xs text-gray-400">{visibleFeaturedFan.length} 张</span>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">

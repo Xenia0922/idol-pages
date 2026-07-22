@@ -14,10 +14,9 @@ interface ScheduleEvent {
 }
 
 const MEMBER_MAP: Record<string, { name: string; emoji: string }> = {
-  hakusai: { name: '白菜', emoji: '💛' },
-  kumo: { name: '云团', emoji: '💙' },
-  yuzi: { name: '柚子', emoji: '💚' },
-  huangyuyu: { name: '黄鱼鱼', emoji: '🩷' },
+  'member-a': { name: '成员A', emoji: '💗' },
+  'member-b': { name: '成员B', emoji: '💙' },
+  'member-c': { name: '成员C', emoji: '💚' },
 };
 
 /**
