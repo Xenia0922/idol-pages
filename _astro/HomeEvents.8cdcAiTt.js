@@ -1,0 +1,1 @@
+import{j as r}from"./jsx-runtime.D_zvdyIk.js";import{E as i}from"./EventCardGrid.DMQOLoip.js";import"./index.DBy5LfQW.js";import"./eventImages.TrfgdaNt.js";import"./Skeleton.DoWkHF8Z.js";import"./SkeletonSwap.DTffyGZA.js";function n({initial:t}){return r.jsx(i,{initial:t,filter:"past",sortDir:"desc",limit:4,fallbackImg:"/images/events/live-2026-01-31.webp"})}export{n as default};
