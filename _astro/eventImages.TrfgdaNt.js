@@ -1,1 +1,0 @@
-const i={"live-2026-08-01":"/images/events/live-2026-08-01.webp","live-2026-07-15":"/images/events/live-2026-07-15.webp","live-2026-06-20":"/images/events/live-2026-06-20.webp"};function s(e,v="/images/events/placeholder.webp"){return i[e]||v}export{s as g};

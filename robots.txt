@@ -1,4 +1,0 @@
-User-agent: *
-Allow: /
-
-Sitemap: https://gleams.vip/sitemap-index.xml
