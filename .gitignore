@@ -1,13 +1,12 @@
 # build output
 dist/
-.output/
 
 # dependencies
 node_modules/
 
-# environment variables
+# environment (do NOT commit real credentials)
 .env
-.env.*
+.env.local
 
 # OS files
 .DS_Store
@@ -19,8 +18,6 @@ Thumbs.db
 
 # Astro
 .astro/
-.wrangler/
-weibo-crawler/
 
-# Agent working memory (not project source)
-.workbuddy/
+# Cloudflare
+.wrangler/
