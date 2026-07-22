@@ -4,7 +4,7 @@
 
 开箱即用的地偶粉丝站。含成员展示、演出日程、画廊、粉丝广场、管理后台。
 
-[在线 Demo](https://gleams.vip) · [GitHub](https://github.com/Xenia0922/idol-pages)
+[在线 Demo](https://xenia0922.github.io/idol-pages/) · [GitHub](https://github.com/Xenia0922/idol-pages)
 
 ## 功能
 
