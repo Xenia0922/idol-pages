@@ -1,0 +1,49 @@
+---
+import site from '../data/site.json';
+import { SiteSocial } from './SiteBits';
+---
+
+<footer class="relative mt-16 text-gray-700 dark:text-gray-300">
+  <div class="h-px w-full bg-gradient-to-r from-transparent via-[color-mix(in_srgb,var(--accent)_45%,transparent)] to-transparent opacity-70"></div>
+  <div class="relative backdrop-blur-xl bg-white/40 dark:bg-white/[0.03]">
+    <div class="max-w-7xl mx-auto px-4 pb-10 pt-12">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+      <div>
+        <h4 class="text-xs tracking-widest text-gray-400 dark:text-gray-500 uppercase mb-4">导航</h4>
+        <div class="space-y-2.5">
+          <a href="/" class="block text-sm text-gray-500 dark:text-gray-400 hover:text-pink-500 dark:hover:text-pink-400 transition-colors">首页</a>
+          <a href="/members" class="block text-sm text-gray-500 dark:text-gray-400 hover:text-pink-500 dark:hover:text-pink-400 transition-colors">成员</a>
+          <a href="/schedule" class="block text-sm text-gray-500 dark:text-gray-400 hover:text-pink-500 dark:hover:text-pink-400 transition-colors">日程</a>
+          <a href="/gallery" class="block text-sm text-gray-500 dark:text-gray-400 hover:text-pink-500 dark:hover:text-pink-400 transition-colors">画廊</a>
+        </div>
+      </div>
+
+      <div>
+        <h4 class="text-xs tracking-widest text-gray-400 dark:text-gray-500 uppercase mb-4">应援</h4>
+        <div class="space-y-2.5">
+          <a href="/tokuten" class="block text-sm text-gray-500 dark:text-gray-400 hover:text-pink-500 dark:hover:text-pink-400 transition-colors">特典规则</a>
+          <a href="/about" class="block text-sm text-gray-500 dark:text-gray-400 hover:text-pink-500 dark:hover:text-pink-400 transition-colors">关于我们</a>
+        </div>
+        <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-800">
+          <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">官方QQ：{site.staffQQ}</p>
+          <p class="text-xs text-gray-500 dark:text-gray-400">{site.qqGroupName}QQ群：{site.qqGroup}</p>
+        </div>
+      </div>
+
+      <div>
+        <h4 class="text-xs tracking-widest text-gray-400 dark:text-gray-500 uppercase mb-4">关注</h4>
+        <SiteSocial client:load variant="list" initial={{ weibo: site.weibo, xiaohongshu: site.xiaohongshu, douyin: site.douyin }} />
+      </div>
+
+      <div>
+        <h4 class="text-xs tracking-widest text-gray-400 dark:text-gray-500 uppercase mb-4">{site.name}</h4>
+        <p class="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">{site.subtitle}</p>
+      </div>
+    </div>
+
+    <div class="mt-10 pt-6 border-t border-gray-200 dark:border-gray-800 text-center text-xs text-gray-500 dark:text-gray-400 space-y-1">
+      <p>&copy; {new Date().getFullYear()} {site.name} Fansite</p>
+      <p>Powered by <a href="https://github.com/Xenia0922/idol-fansite-template" class="text-gray-500 dark:text-gray-400 hover:text-pink-400 transition-colors">Idol Fansite Template</a></p>
+    </div>
+  </div>
+</footer>

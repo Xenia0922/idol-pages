@@ -1,0 +1,114 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import HeroTitle from '../components/HeroTitle.astro';
+import site from '../data/site.json';
+import membersData from '../data/members.json';
+import scheduleData from '../data/schedule.json';
+import HomeMembers from '../components/HomeMembers';
+import HomeEvents from '../components/HomeEvents';
+import UpcomingEvents from '../components/UpcomingEvents';
+import { SiteSocial, LiveLink } from '../components/SiteBits';
+import UpcomingCountdown from '../components/UpcomingCountdown';
+
+// 构建期种子：让静态 HTML 直接带内容（消除“后加载空白”）。
+// 运行时 middleware 仍会把 D1 实时数据注入 window.__SSR_DATA__，
+// 组件优先读它（后台新增/修改即时同步，无需重建）。
+const initialMembers = membersData.members.map((m: any) => ({
+  id: m.id,
+  name: m.name,
+  name_jp: m.nameJP || '',
+  color: m.color || '',
+  emoji: m.emoji || '',
+  birthday: m.birthday || '',
+  constellation: m.constellation || '',
+  status: m.status || 'active',
+  image: m.image || '',
+}));
+const initialEvents = scheduleData.events as any[];
+---
+
+<BaseLayout>
+  <section class="relative overflow-hidden">
+    <img src={site.hero.bg} alt="" data-hero="bg" class="hero-bg-img absolute inset-0 w-full h-full object-cover" style={`--bg-opacity:${site.hero.bgOpacity ?? 0.22};object-position:${site.hero.bgPosition ?? 'center center'}`} fetchpriority="high" decoding="async" />
+    <div class="absolute left-1/2 -translate-x-1/2 top-6 sm:top-10 w-44 h-44 sm:w-56 sm:h-56 rounded-full blur-3xl pointer-events-none" style="background: color-mix(in srgb, var(--accent) 38%, transparent); opacity: 0.55;"></div>
+    <div class="relative max-w-7xl mx-auto px-4 py-16 sm:py-20 md:py-28 text-center">
+      <img src={site.hero.logo} alt={site.name} data-hero="logo" class="rise relative z-10 mx-auto w-24 h-24 sm:w-32 sm:h-32 rounded-full shadow-xl mb-6" style="animation-delay:.05s" />
+      <HeroTitle name={site.hero.title} subtitle={site.hero.subtitle} />
+      <p class="rise text-xs sm:text-sm text-[var(--text-soft)] dark:text-gray-400 max-w-sm mx-auto mb-7 sm:mb-9 px-2 leading-relaxed" data-hero="desc" style="animation-delay:.45s">
+        {site.weiboDesc}
+      </p>
+      <div class="rise flex flex-wrap justify-center gap-2.5 sm:gap-3" style="animation-delay:.55s">
+        <a href="/members" class="btn-pink text-xs sm:text-sm !px-5 sm:!px-7 !py-3 sm:!py-3">成员介绍</a>
+        <a href="/schedule" class="btn-outline text-xs sm:text-sm !px-5 sm:!px-7 !py-3 sm:!py-3">演出日程</a>
+        <LiveLink client:load field="weibo" label="微博" initial={site.weibo} className="btn-outline text-xs sm:text-sm !px-5 sm:!px-7 !py-3 sm:!py-3" />
+      </div>
+      <div class="rise mt-6" style="animation-delay:.65s; min-height: 0;">
+        <UpcomingCountdown client:load initial={initialEvents} />
+      </div>
+    </div>
+  </section>
+
+  <section class="max-w-7xl mx-auto px-4 py-12 md:py-20">
+    <div class="text-center mb-10" data-reveal>
+      <p class="section-title-en">✦</p>
+      <h2 class="section-title">成员</h2>
+    </div>
+    <div>
+      <HomeMembers client:visible initial={initialMembers} />
+    </div>
+  </section>
+
+  <section class="py-12 md:py-20 border-t glass-divider">
+    <div class="max-w-7xl mx-auto px-4">
+      <div class="text-center mb-10" data-reveal>
+        <p class="section-title-en">✦</p>
+        <h2 class="section-title">即将到来</h2>
+      </div>
+      <div>
+        <UpcomingEvents client:visible initial={initialEvents} />
+      </div>
+    </div>
+  </section>
+
+  <section class="py-12 md:py-20 border-t glass-divider">
+    <div class="max-w-7xl mx-auto px-4">
+      <div class="text-center mb-10" data-reveal>
+        <p class="section-title-en">✦</p>
+        <h2 class="section-title">过往行程</h2>
+      </div>
+      <div>
+        <HomeEvents client:visible initial={initialEvents} />
+      </div>
+      <div class="text-center mt-8">
+        <a href="/schedule" class="btn-outline text-xs sm:text-sm">查看完整日程 →</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="max-w-4xl mx-auto px-4 py-12 md:py-16 text-center" data-reveal>
+    <p class="section-title-en">✦</p>
+    <h2 class="section-title mb-8">关注 {site.name}</h2>
+    <SiteSocial client:load variant="buttons" initial={{ weibo: site.weibo, xiaohongshu: site.xiaohongshu, douyin: site.douyin }} />
+  </section>
+</BaseLayout>
+
+<script is:inline>
+  // Hero 背景图淡入：加载完后加 loaded class 触发 opacity 过渡
+  // 双 rAF 确保元素先以 opacity:0 渲染一帧，下一帧才加 class 触发 transition
+  // （否则有缓存时 complete=true 立即 addClass，transition 不触发，图片瞬间出现）
+  (function () {
+    var bg = document.querySelector('.hero-bg-img');
+    if (!bg) return;
+    function reveal() {
+      requestAnimationFrame(function () {
+        requestAnimationFrame(function () { bg.classList.add('loaded'); });
+      });
+    }
+    if (bg.complete && bg.naturalWidth > 0) {
+      reveal();
+    } else {
+      bg.addEventListener('load', reveal);
+      bg.addEventListener('error', function () { bg.classList.add('loaded'); });
+    }
+  })();
+</script>

@@ -1,0 +1,376 @@
+---
+// 招募公告 · 非阻断式左下角玻璃卡
+// 内容运行时从 /api/recruits 读取（管理员可在后台自助编辑/多条投放）；
+// 组件内写死一条 fallback（CF 不可用时仍展示），deadline 过期则整体不显示。
+// 多条有效广告时自动轮播（悬停/聚焦暂停、关闭记忆全部）。
+// 设计原则：不挡 Hero、不引起布局抖动（fixed 浮层）、可关闭、localStorage 按 id 记忆不再弹
+const FALLBACK = {
+  id: 'default',
+  title: '研修生招募',
+  subtitle: '公主风王道系地下偶像团体',
+  body: '微博转发关注抽 52 元偶活基金',
+  cta_text: '查看详情 →',
+  cta_url: 'https://weibo.com/7972735157/R7KNSzPdt',
+  deadline: '2026-08-10',
+};
+---
+
+<div
+  id="recruit-toast"
+  class="recruit-toast"
+  role="status"
+  aria-live="polite"
+  data-id={FALLBACK.id}
+  data-deadline={FALLBACK.deadline}
+  data-subtitle={FALLBACK.subtitle}
+  data-body={FALLBACK.body}
+>
+  <button type="button" class="recruit-close" aria-label="关闭招募通知">&times;</button>
+  <p class="recruit-title" data-field="title">{FALLBACK.title}</p>
+  <p class="recruit-sub" data-field="subtitle">{FALLBACK.subtitle}</p>
+  <p class="recruit-meta" data-field="meta"></p>
+  <a class="recruit-cta" data-field="cta" href={FALLBACK.cta_url} target="_blank" rel="noopener">{FALLBACK.cta_text}</a>
+  <div class="recruit-dots" data-field="dots" aria-hidden="true"></div>
+</div>
+
+<style>
+  .recruit-toast {
+    position: fixed;
+    left: 1.25rem;
+    bottom: calc(1.25rem + env(safe-area-inset-bottom));
+    z-index: 40;
+    width: 320px;
+    max-width: calc(100vw - 2.5rem);
+    padding: 1rem 1.1rem 1.1rem;
+    border-radius: var(--radius-lg);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    border-left: 3px solid var(--accent);
+    background: linear-gradient(160deg, rgba(255, 255, 255, 0.72), rgba(255, 255, 255, 0.52));
+    backdrop-filter: blur(20px) saturate(1.2);
+    -webkit-backdrop-filter: blur(20px) saturate(1.2);
+    box-shadow: var(--shadow-md), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+    color: var(--text);
+    opacity: 0;
+    transform: translateY(16px);
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.5s var(--ease), transform 0.5s var(--ease), visibility 0.5s var(--ease);
+  }
+  .recruit-toast.show {
+    opacity: 1;
+    transform: translateY(0);
+    visibility: visible;
+    pointer-events: auto;
+  }
+  :global(.dark) .recruit-toast {
+    background: linear-gradient(160deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.035));
+    border-color: rgba(255, 255, 255, 0.09);
+    border-left-color: var(--accent);
+    box-shadow: var(--shadow-md), inset 0 1px 0 rgba(255, 255, 255, 0.07);
+    color: #c8c3da;
+  }
+
+  .recruit-title {
+    font-size: 0.9375rem; font-weight: 700; color: var(--accent);
+    margin-bottom: 0.35rem; line-height: 1.3;
+  }
+  :global(.dark) .recruit-title { color: var(--accent); }
+  .recruit-sub {
+    font-size: 0.75rem; color: var(--text-soft); line-height: 1.4;
+    margin-bottom: 0.55rem;
+  }
+  :global(.dark) .recruit-sub { color: #a59fc0; }
+  .recruit-meta {
+    font-size: 0.75rem; color: var(--text-soft); line-height: 1.45; margin-bottom: 0.7rem;
+  }
+  .recruit-accent { color: var(--accent); font-weight: 700; }
+  :global(.dark) .recruit-meta { color: #a59fc0; }
+  .recruit-cta {
+    display: inline-flex; align-items: center; gap: 0.25rem;
+    font-size: 0.8125rem; font-weight: 700; color: var(--accent);
+    text-decoration: none;
+    transition: gap 0.2s var(--ease);
+  }
+  .recruit-cta:hover { gap: 0.5rem; }
+
+  /* 广告切换：内容元素统一过渡，切换时 .switching 触发淡出+轻微上移 */
+  .recruit-title, .recruit-sub, .recruit-meta, .recruit-cta {
+    transition: opacity 0.22s var(--ease), transform 0.22s var(--ease);
+  }
+  .recruit-toast.switching .recruit-title,
+  .recruit-toast.switching .recruit-sub,
+  .recruit-toast.switching .recruit-meta,
+  .recruit-toast.switching .recruit-cta {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+
+  /* 多广告指示点（仅多条时出现） */
+  .recruit-dots {
+    display: flex; gap: 0.3rem; margin-top: 0.55rem;
+  }
+  .recruit-dots:empty { display: none; }
+  .recruit-dot {
+    width: 6px; height: 6px; border-radius: 9999px;
+    background: color-mix(in srgb, var(--text-soft) 55%, transparent);
+    transition: background 0.25s var(--ease), transform 0.25s var(--ease);
+  }
+  .recruit-dot.active { background: var(--accent); transform: scale(1.15); }
+  :global(.dark) .recruit-dot { background: rgba(255, 255, 255, 0.18); }
+  :global(.dark) .recruit-dot.active { background: var(--accent); }
+
+  .recruit-close {
+    position: absolute; top: 0.5rem; right: 0.5rem;
+    width: 1.5rem; height: 1.5rem; border-radius: 9999px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1rem; line-height: 1; color: var(--text-soft);
+    background: transparent; border: none; cursor: pointer;
+    transition: background 0.2s var(--ease), color 0.2s var(--ease);
+  }
+  .recruit-close:hover { background: rgba(20, 14, 40, 0.06); color: var(--text); }
+  :global(.dark) .recruit-close:hover { background: rgba(255, 255, 255, 0.08); color: #ece9f4; }
+
+  /* 移动端：缩小体积、固定在左下角，不占满屏幕也不挤占右下角返回顶部 */
+  @media (max-width: 767px) {
+    .recruit-toast {
+      left: 0.75rem;
+      bottom: calc(0.75rem + env(safe-area-inset-bottom));
+      right: auto;
+      width: auto;
+      max-width: min(74vw, 260px);
+      padding: 0.7rem 0.85rem 0.8rem;
+    }
+    .recruit-title { font-size: 0.8125rem; margin-bottom: 0.25rem; }
+    .recruit-sub { font-size: 0.6875rem; margin-bottom: 0.4rem; }
+    .recruit-meta { font-size: 0.6875rem; margin-bottom: 0.5rem; }
+    .recruit-cta { font-size: 0.75rem; }
+  }
+
+  /* 无障碍：减少动态效果时只淡入、不位移 */
+  @media (prefers-reduced-motion: reduce) {
+    .recruit-toast { transition: opacity 0.25s ease; transform: none; }
+    .recruit-toast.show { transform: none; }
+    .recruit-toast.switching .recruit-title,
+    .recruit-toast.switching .recruit-sub,
+    .recruit-toast.switching .recruit-meta,
+    .recruit-toast.switching .recruit-cta { transform: none; }
+  }
+</style>
+
+<script is:inline>
+  (function () {
+    var el = document.getElementById('recruit-toast');
+    if (!el) return;
+
+    // 按 id 记忆已关闭的招募，互不干扰
+    var KEY_CLOSED = 'fansite-recruit-closed';
+    var closed = (function () {
+      try { return JSON.parse(localStorage.getItem(KEY_CLOSED) || '[]'); } catch (e) { return []; }
+    })();
+    function isClosed(id) { return closed.indexOf(String(id)) !== -1; }
+    function addClosed(id) {
+      try {
+        if (closed.indexOf(String(id)) === -1) closed.push(String(id));
+        localStorage.setItem(KEY_CLOSED, JSON.stringify(closed));
+      } catch (e) {}
+    }
+
+    var reduceMotion = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+
+    // 当前展示条目（初始为组件内写死的 fallback）
+    var current = {
+      id: el.dataset.id || 'default',
+      title: el.querySelector('[data-field="title"]').textContent,
+      subtitle: el.dataset.subtitle || '',
+      body: el.dataset.body || '',
+      cta_text: el.querySelector('[data-field="cta"]').textContent,
+      cta_url: el.querySelector('[data-field="cta"]').getAttribute('href'),
+      deadline: el.dataset.deadline || null,
+    };
+
+    // 按本地时间判定：deadline 可为 'YYYY-MM-DD'（当天 23:59:59 过期）或 'YYYY-MM-DDTHH:MM'（具体时刻过期）
+    function isActive(deadline) {
+      if (!deadline) return true;
+      var end;
+      if (deadline.length > 10) {
+        // 带时间（YYYY-MM-DDTHH:MM），补秒和时区
+        end = new Date(deadline + ':00+08:00');
+      } else {
+        // 仅日期，当天 23:59:59 过期
+        end = new Date(deadline + 'T23:59:59+08:00');
+      }
+      return Date.now() <= end.getTime();
+    }
+
+    // 截止时间格式化：「M.DD」或「M.DD HH:MM」
+    function fmtDeadline(d) {
+      if (!d) return '';
+      var m = /^(\d{4})-(\d{2})-(\d{2})(?:T(\d{2}):(\d{2}))?/.exec(d);
+      if (!m) return d;
+      var base = parseInt(m[2], 10) + '.' + m[3];
+      if (m[4] && m[5]) return base + ' ' + m[4] + ':' + m[5];
+      return base;
+    }
+
+    // 以安全方式重建 meta 行：强调色片段 + 普通正文（避免 innerHTML 注入）
+    function renderMeta() {
+      var metaEl = el.querySelector('[data-field="meta"]');
+      // 截止日不再单独显示（用户在正文里自行写"报名截止 X.X · ..."）；deadline 仅用于过期判断
+      metaEl.textContent = current.body || '';
+    }
+
+    function mapAd(r) {
+      return {
+        id: r.id, title: r.title, subtitle: r.subtitle || '',
+        body: r.body, cta_text: r.cta_text, cta_url: r.cta_url,
+        deadline: r.deadline || null,
+      };
+    }
+
+    function applyRecruit(r) {
+      el.dataset.id = String(r.id);
+      el.dataset.deadline = r.deadline || '';
+      el.dataset.subtitle = r.subtitle || '';
+      el.dataset.body = r.body || '';
+      el.querySelector('[data-field="title"]').textContent = r.title;
+      var sub = el.querySelector('[data-field="subtitle"]');
+      sub.textContent = r.subtitle || '';
+      sub.style.display = r.subtitle ? '' : 'none';
+      renderMeta();
+      var cta = el.querySelector('[data-field="cta"]');
+      var ctaText = r.cta_text || '查看详情 →';
+      if (!/[→›❯]/u.test(ctaText)) ctaText += ' →';
+      cta.textContent = ctaText;
+      cta.setAttribute('href', r.cta_url || '#');
+    }
+
+    // ---- 多广告轮播 ----
+    var allAds = null;   // 后端返回的有效广告数组（按 sort_order 升序）
+    var idx = 0;
+    var shown = false;
+    var timer = null;
+
+    function renderDots() {
+      var box = el.querySelector('[data-field="dots"]');
+      box.textContent = '';
+      if (!allAds || allAds.length < 2) return;
+      for (var i = 0; i < allAds.length; i++) {
+        var d = document.createElement('span');
+        d.className = 'recruit-dot' + (i === idx ? ' active' : '');
+        box.appendChild(d);
+      }
+    }
+
+    function reveal() {
+      requestAnimationFrame(function () {
+        requestAnimationFrame(function () { el.classList.add('show'); });
+      });
+    }
+
+    // 从 fromIdx 起寻找下一条「未关闭且未过期」的广告并展示；返回是否成功
+    function showNext(fromIdx) {
+      if (!allAds || !allAds.length) {
+        // 无后端广告：展示写死的 fallback
+        if (isClosed(current.id) || !isActive(current.deadline)) { el.remove(); return false; }
+        renderMeta(); renderDots(); reveal(); shown = true; return true;
+      }
+      var n = allAds.length;
+      for (var k = 0; k < n; k++) {
+        var j = (fromIdx + k) % n;
+        var ad = allAds[j];
+        if (!isClosed(ad.id) && isActive(ad.deadline)) {
+          idx = j;
+          if (!shown) {
+            // 首次显示：直接填充内容 + reveal（toast 本身淡入即可，内容无需额外过渡）
+            current = mapAd(ad);
+            applyRecruit(current);
+            renderDots();
+            shown = true;
+            reveal();
+          } else {
+            // 后续切换：淡出 → 换内容 → 淡入
+            switchAd(ad);
+          }
+          return true;
+        }
+      }
+      el.remove();   // 全部已关闭/过期
+      return false;
+    }
+
+    // 切换动画：内容淡出(220ms) → 换内容 → 下一帧淡入
+    function switchAd(ad) {
+      el.classList.add('switching');
+      setTimeout(function () {
+        current = mapAd(ad);
+        applyRecruit(current);
+        renderDots();
+        // 下一帧移除 switching，触发淡入
+        requestAnimationFrame(function () {
+          requestAnimationFrame(function () { el.classList.remove('switching'); });
+        });
+      }, 220);
+    }
+
+    function startCycling() {
+      if (!el.isConnected) return;
+      if (reduceMotion || !allAds || allAds.length < 2) return;
+      stopCycling();
+      timer = setInterval(function () {
+        showNext((idx + 1) % allAds.length);
+      }, 8000);
+    }
+    function stopCycling() { if (timer) { clearInterval(timer); timer = null; } }
+
+    function close() {
+      // 关闭：记忆所有当前有效广告 id，整体隐藏
+      if (allAds && allAds.length) {
+        for (var i = 0; i < allAds.length; i++) addClosed(allAds[i].id);
+      } else {
+        addClosed(current.id);
+      }
+      stopCycling();
+      el.classList.remove('show');
+      el.remove();
+    }
+    var closeBtn = el.querySelector('.recruit-close');
+    if (closeBtn) closeBtn.addEventListener('click', close);
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && el.classList.contains('show')) close();
+    });
+    // 悬停/聚焦时暂停轮播，方便阅读
+    el.addEventListener('mouseenter', stopCycling);
+    el.addEventListener('mouseleave', startCycling);
+    el.addEventListener('focusin', stopCycling);
+    el.addEventListener('focusout', startCycling);
+
+    // 先用 fallback 渲染（含强调色 meta 行），fetch 成功后再覆盖
+    renderMeta();
+
+    fetch('/api/recruits')
+      .then(function (r) { return r.json(); })
+      .then(function (list) {
+        if (Array.isArray(list) && list.length) {
+          // 仅保留未关闭且未过期的条目
+          allAds = list.filter(function (r) {
+            return !isClosed(r.id) && isActive(r.deadline);
+          });
+          if (!allAds.length) { el.remove(); return; }
+        } else if (Array.isArray(list)) {
+          // 后端正常但无广告：不展示（不回退到写死的示例）
+          el.remove();
+          return;
+        }
+        // 展示首条（单条或多条首条都会走到这里）；多条则启动轮播
+        if (!shown) showNext(0);
+        startCycling();
+      })
+      .catch(function () {
+        // 接口异常：保留写死的 fallback 兜底
+        if (!shown) showNext(0);
+      });
+
+    // 兜底：fetch 缓慢时 2s 后按当前状态显示，不阻塞
+    setTimeout(function () { if (!shown) showNext(0); }, 2000);
+  })();
+</script>

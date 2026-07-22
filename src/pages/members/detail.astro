@@ -1,0 +1,12 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import MemberDetail from '../../components/MemberDetail';
+---
+
+<BaseLayout title="成员">
+  <section class="max-w-4xl mx-auto px-4 py-8 md:py-12">
+    <a href="/members" class="inline-flex items-center gap-1 text-sm text-gray-400 hover:text-gray-600 dark:text-gray-400 mb-6">← 返回</a>
+
+    <MemberDetail client:load />
+  </section>
+</BaseLayout>

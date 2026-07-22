@@ -1,0 +1,31 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import scheduleData from '../../data/schedule.json';
+import { EVENT_BODIES } from '../../data/eventBodies';
+import { getEventImage } from '../../utils/eventImages';
+import { marked } from 'marked';
+import EventDetail from '../../components/EventDetail';
+
+export async function getStaticPaths() {
+  return (scheduleData.events as any[]).map((e) => ({
+    params: { id: e.id },
+    // 构建期预渲染 body 为 HTML，存入 bodyHtml——详情页无需客户端加载 marked（约 40KB），
+    // 静态 HTML 直接含正文，零布局跳动。运行时缺失 bodyHtml 时才动态 import marked 兜底。
+    props: {
+      event: {
+        ...e,
+        image: getEventImage(e.id),
+        body: EVENT_BODIES[e.id] || '',
+        bodyHtml: marked.parse(EVENT_BODIES[e.id] || '', { async: false }) as string,
+      },
+    },
+  }));
+}
+
+const id = Astro.params.id;
+const { event } = Astro.props;
+---
+
+<BaseLayout title={event.title}>
+  <EventDetail client:load id={id} event={event} />
+</BaseLayout>

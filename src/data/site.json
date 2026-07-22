@@ -1,0 +1,30 @@
+{
+  "name": "Your Idol Group",
+  "subtitle": "在这里写下你们团体的简介标语",
+  "description": "XXX 地下偶像团体非官方应援站。",
+  "location": "你的城市",
+  "qqGroup": "",
+  "qqGroupName": "应援群",
+  "staffQQ": "",
+  "weidian": "",
+  "weibo": "",
+  "weiboName": "@你的团体微博",
+  "weiboDesc": "非官方粉丝应援站 ✨",
+  "ogImage": "/logo.png",
+  "hero": {
+    "title": "Your Idol Group",
+    "subtitle": "在这里写下你们团体的简介标语",
+    "logo": "/logo.png",
+    "bg": "/hero-bg.webp",
+    "bgOpacity": 0.22,
+    "bgPosition": "center center"
+  },
+  "douyin": "",
+  "xiaohongshu": "",
+  "tokutenRules": [
+    "特典规则以官方发布为准",
+    "团切仅在个人队列开始前售卖10分钟",
+    "电切可通过官方渠道预约",
+    "详细规则请关注官方账号获取最新信息"
+  ]
+}

@@ -1,0 +1,26 @@
+# build output
+dist/
+.output/
+
+# dependencies
+node_modules/
+
+# environment variables
+.env
+.env.*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+
+# Astro
+.astro/
+.wrangler/
+weibo-crawler/
+
+# Agent working memory (not project source)
+.workbuddy/

@@ -1,0 +1,28 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import site from '../data/site.json';
+import AboutContent from '../components/AboutContent';
+---
+
+<BaseLayout title="关于">
+  <section class="py-16 md:py-20 px-4 max-w-4xl mx-auto">
+    <div class="text-center mb-12" data-reveal>
+      <p class="section-title-en">✦</p>
+      <h1 class="section-title">关于 {site.name}</h1>
+    </div>
+
+    <AboutContent
+      client:load
+      siteName={site.name}
+      initial={{
+        weidian: site.weidian,
+        staff_qq: site.staffQQ,
+        weibo: site.weibo,
+        weibo_name: site.weiboName,
+        weibo_desc: site.weiboDesc,
+        xiaohongshu: site.xiaohongshu,
+        douyin: site.douyin,
+      }}
+    />
+  </section>
+</BaseLayout>
