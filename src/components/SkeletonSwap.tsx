@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 
 /**
  * 骨架屏 → 真实内容的「交叉淡入」过渡组件。
@@ -18,7 +18,7 @@ export default function SkeletonSwap({
   loading,
   skeleton,
   children,
-  className = '',
+  className = "",
 }: {
   loading: boolean;
   skeleton: React.ReactNode;
@@ -58,7 +58,7 @@ export default function SkeletonSwap({
       {showSk && (
         <div
           aria-hidden="true"
-          className={`pointer-events-none absolute inset-0 z-10 transition-opacity duration-300 ${skFading ? 'opacity-0' : 'opacity-100'}`}
+          className={`pointer-events-none absolute inset-0 z-10 transition-opacity duration-300 ${skFading ? "opacity-0" : "opacity-100"}`}
         >
           {skeleton}
         </div>

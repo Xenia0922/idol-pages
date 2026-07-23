@@ -1,4 +1,4 @@
-import { Component, type ReactNode, type ErrorInfo } from 'react';
+import { Component, type ReactNode, type ErrorInfo } from "react";
 
 interface Props {
   children: ReactNode;
@@ -21,7 +21,7 @@ export default class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, info: ErrorInfo) {
-    console.error('[ErrorBoundary]', error, info.componentStack);
+    console.error("[ErrorBoundary]", error, info.componentStack);
   }
 
   render() {
@@ -33,7 +33,7 @@ export default class ErrorBoundary extends Component<Props, State> {
             出了点问题
           </p>
           <p className="text-sm text-gray-400 dark:text-gray-500 mb-3">
-            {this.state.error?.message || '未知错误'}
+            {this.state.error?.message || "未知错误"}
           </p>
           <button
             onClick={() => this.setState({ hasError: false, error: null })}

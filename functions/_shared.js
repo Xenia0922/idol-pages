@@ -6,7 +6,7 @@
  *   import { adminOk, json, withTable } from '../_shared.js';
  */
 
-import { rateAllow, rateLog } from './api/_rate.js';
+import { rateAllow, rateLog } from "./api/_rate.js";
 
 /**
  * 返回 JSON Response（含安全头）
@@ -15,12 +15,12 @@ export function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
     status,
     headers: {
-      'Content-Type': 'application/json',
-      'X-Content-Type-Options': 'nosniff',
-      'X-Frame-Options': 'DENY',
-      'Referrer-Policy': 'strict-origin-when-cross-origin',
-      'Strict-Transport-Security': 'max-age=31536000; includeSubDomains',
-      'Access-Control-Allow-Origin': '*',
+      "Content-Type": "application/json",
+      "X-Content-Type-Options": "nosniff",
+      "X-Frame-Options": "DENY",
+      "Referrer-Policy": "strict-origin-when-cross-origin",
+      "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
+      "Access-Control-Allow-Origin": "*",
     },
   });
 }
@@ -29,7 +29,7 @@ export function json(data, status = 200) {
  * 验证管理后台暗号
  */
 export function adminOk(request, env) {
-  return (request.headers.get('x-admin-code') || '') === env.ADMIN_CODE;
+  return (request.headers.get("x-admin-code") || "") === env.ADMIN_CODE;
 }
 
 /**
@@ -38,15 +38,15 @@ export function adminOk(request, env) {
  * 用法：const denied = await adminGuard(request, env); if (denied) return denied;
  */
 export async function adminGuard(request, env) {
-  if (!adminOk(request, env)) return json({ error: '无权限' }, 403);
+  if (!adminOk(request, env)) return json({ error: "无权限" }, 403);
   try {
-    const ip = request.headers.get('cf-connecting-ip') || 'unknown';
-    const allowed = await rateAllow(env, ip, 'admin', 500, 24 * 3600 * 1000);
-    if (!allowed) return json({ error: '操作过于频繁，请稍后再试' }, 429);
-    await rateLog(env, ip, 'admin');
+    const ip = request.headers.get("cf-connecting-ip") || "unknown";
+    const allowed = await rateAllow(env, ip, "admin", 500, 24 * 3600 * 1000);
+    if (!allowed) return json({ error: "操作过于频繁，请稍后再试" }, 429);
+    await rateLog(env, ip, "admin");
   } catch (e) {
     // rateAllow/rateLog 内部已 try/catch，此处兜底：任何意外异常都 fail-open 放行
-    console.error('[adminGuard] rate check/log failed, fail-open:', e.message);
+    console.error("[adminGuard] rate check/log failed, fail-open:", e.message);
   }
   return null;
 }
@@ -61,19 +61,22 @@ export async function verifyTurnstile(token, ip, env) {
   if (!env.TURNSTILE_SECRET_KEY) return true; // 未配置，fail-open
   if (!token) return true; // token 空（Turnstile 脚本加载失败），fail-open
   try {
-    const res = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: new URLSearchParams({
-        secret: env.TURNSTILE_SECRET_KEY,
-        response: token,
-        remoteip: ip || '',
-      }).toString(),
-    });
+    const res = await fetch(
+      "https://challenges.cloudflare.com/turnstile/v0/siteverify",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({
+          secret: env.TURNSTILE_SECRET_KEY,
+          response: token,
+          remoteip: ip || "",
+        }).toString(),
+      },
+    );
     const data = await res.json();
     return data.success === true;
   } catch (e) {
-    console.error('[turnstile] verify failed:', e.message);
+    console.error("[turnstile] verify failed:", e.message);
     return false; // 验证服务异常，fail-closed
   }
 }
@@ -92,8 +95,10 @@ export function containsBlocked(text, words) {
     const reMatch = /^\/(.+)\/([imu]*)$/.exec(w);
     if (reMatch) {
       try {
-        if (new RegExp(reMatch[1], reMatch[2] || 'i').test(text)) return true;
-      } catch { /* 无效正则跳过 */ }
+        if (new RegExp(reMatch[1], reMatch[2] || "i").test(text)) return true;
+      } catch {
+        /* 无效正则跳过 */
+      }
     } else {
       if (lower.includes(String(w).toLowerCase())) return true;
     }
@@ -111,7 +116,7 @@ export async function withTable(env, ensureTable, fn) {
   try {
     return await fn();
   } catch (e) {
-    if (/no such table/i.test(e.message || '')) {
+    if (/no such table/i.test(e.message || "")) {
       await ensureTable(env);
       return await fn();
     }

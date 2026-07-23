@@ -13,69 +13,86 @@
  *
  * 注意：本文件为 Cloudflare Pages Functions，必须纯 JS（不可用 TS 注解）。
  */
-import { marked } from 'marked';
+import { marked } from "marked";
 
 function escapeHtml(s) {
-  return String(s == null ? '' : s)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
+  return String(s == null ? "" : s)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
 }
 
 function escapeAttr(s) {
-  return escapeHtml(s).replace(/'/g, '&#39;');
+  return escapeHtml(s).replace(/'/g, "&#39;");
 }
 
 function renderDetail(row) {
   const id = row.id;
   const title = row.title || id;
 
-  let dateLabel = '';
+  let dateLabel = "";
   const d = new Date(row.date);
   if (!isNaN(d.getTime())) {
-    dateLabel = (d.getMonth() + 1) + '月' + d.getDate() + '日';
+    dateLabel = d.getMonth() + 1 + "月" + d.getDate() + "日";
   }
 
-  let bodyHtml = '';
+  let bodyHtml = "";
   if (row.body) {
     try {
       bodyHtml = marked.parse(row.body, { async: false });
     } catch (e) {
-      bodyHtml = '';
+      bodyHtml = "";
     }
   }
 
   const time = row.time
-    ? '<span class="bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 px-3 py-1.5 rounded-full">' + escapeHtml(row.time) + '</span>'
-    : '';
+    ? '<span class="bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 px-3 py-1.5 rounded-full">' +
+      escapeHtml(row.time) +
+      "</span>"
+    : "";
   const venue = row.venue
-    ? '<span class="bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 px-3 py-1.5 rounded-full">' + escapeHtml(row.venue) + '</span>'
-    : '';
+    ? '<span class="bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 px-3 py-1.5 rounded-full">' +
+      escapeHtml(row.venue) +
+      "</span>"
+    : "";
   const image = row.image
-    ? '<img src="' + escapeAttr(row.image) + '" alt="' + escapeAttr(title) + '" class="w-full rounded-2xl object-cover max-h-[500px] bg-gray-100 dark:bg-gray-800 mb-8" loading="lazy" decoding="async" />'
-    : '';
+    ? '<img src="' +
+      escapeAttr(row.image) +
+      '" alt="' +
+      escapeAttr(title) +
+      '" class="w-full rounded-2xl object-cover max-h-[500px] bg-gray-100 dark:bg-gray-800 mb-8" loading="lazy" decoding="async" />'
+    : "";
 
   return (
-    '\n' +
+    "\n" +
     '  <article class="max-w-3xl mx-auto px-4 py-12 md:py-16 content-enter">\n' +
     '    <a href="/schedule" class="inline-flex items-center gap-1 text-sm text-gray-400 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-200 mb-6">← 返回日程</a>\n' +
     '    <div class="flex flex-wrap gap-2 mb-6 text-sm">\n' +
-    '      <span class="bg-pink-50 dark:bg-gray-800 text-pink-600 dark:text-pink-300 px-3 py-1.5 rounded-full font-medium">' + dateLabel + '</span>\n' +
-    time + '\n' +
-    venue + '\n' +
-    '    </div>\n' +
-    '    <h1 class="text-2xl md:text-3xl font-extrabold text-gray-900 dark:text-gray-100 mb-2">' + escapeHtml(title) + '</h1>\n' +
-    image + '\n' +
-    '    <div class="event-detail">' + bodyHtml + '</div>\n' +
-    '  </article>'
+    '      <span class="bg-pink-50 dark:bg-gray-800 text-pink-600 dark:text-pink-300 px-3 py-1.5 rounded-full font-medium">' +
+    dateLabel +
+    "</span>\n" +
+    time +
+    "\n" +
+    venue +
+    "\n" +
+    "    </div>\n" +
+    '    <h1 class="text-2xl md:text-3xl font-extrabold text-gray-900 dark:text-gray-100 mb-2">' +
+    escapeHtml(title) +
+    "</h1>\n" +
+    image +
+    "\n" +
+    '    <div class="event-detail">' +
+    bodyHtml +
+    "</div>\n" +
+    "  </article>"
   );
 }
 
 function notFound() {
-  return new Response('Not Found', {
+  return new Response("Not Found", {
     status: 404,
-    headers: { 'Content-Type': 'text/html; charset=utf-8' },
+    headers: { "Content-Type": "text/html; charset=utf-8" },
   });
 }
 
@@ -83,17 +100,22 @@ export async function onRequest(context) {
   const { request, env, next } = context;
   try {
     const url = new URL(request.url);
-    const path = url.pathname.replace(/\/+$/, '');
+    const path = url.pathname.replace(/\/+$/, "");
     const m = path.match(/^\/schedule\/([A-Za-z0-9_-]+)$/);
-    if (!m || m[1] === 'index') return next();
+    if (!m || m[1] === "index") return next();
 
     // 先尝试静态详情页（构建产物）。next() 在边缘可能对已存在静态页抛异常 → 用 .catch 兜底，绝不 500。
     const resp = await next().catch(() => null);
     const ct =
       resp && resp.headers && resp.headers.get
-        ? resp.headers.get('Content-Type') || ''
-        : '';
-    if (resp && resp.status >= 200 && resp.status < 400 && ct.includes('text/html')) {
+        ? resp.headers.get("Content-Type") || ""
+        : "";
+    if (
+      resp &&
+      resp.status >= 200 &&
+      resp.status < 400 &&
+      ct.includes("text/html")
+    ) {
       return resp; // 已构建静态页，直接放行（middleware 已注入数据），最快路径
     }
 
@@ -102,11 +124,13 @@ export async function onRequest(context) {
     let row = null;
     try {
       if (env && env.DB) {
-        const r = await env.DB.prepare('SELECT * FROM events WHERE id = ?').bind(id).all();
+        const r = await env.DB.prepare("SELECT * FROM events WHERE id = ?")
+          .bind(id)
+          .all();
         row = r && r.results && r.results[0] ? r.results[0] : null;
       }
     } catch (e) {
-      console.error('[path] d1 error', e && e.message);
+      console.error("[path] d1 error", e && e.message);
     }
     if (!row) {
       // 确实不存在：维持原响应（404；若 next() 异常则给兜底 404），绝不抛异常
@@ -122,7 +146,7 @@ export async function onRequest(context) {
     }
     if (!shellText) {
       try {
-        const home = await fetch(new URL('/', request.url));
+        const home = await fetch(new URL("/", request.url));
         shellText = await home.text();
       } catch (_) {}
     }
@@ -132,11 +156,14 @@ export async function onRequest(context) {
     const mainClose = shellText.search(/<\/main>/i);
     if (mainOpen === -1 || mainClose === -1) return resp || notFound();
 
-    const gt = shellText.indexOf('>', mainOpen) + 1;
-    let html = shellText.slice(0, gt) + renderDetail(row) + shellText.slice(mainClose);
-        let siteName = 'Fansite';
+    const gt = shellText.indexOf(">", mainOpen) + 1;
+    let html =
+      shellText.slice(0, gt) + renderDetail(row) + shellText.slice(mainClose);
+    let siteName = "Fansite";
     try {
-      const siteRow = await env.DB.prepare("SELECT value FROM site_config WHERE key = 'hero_config'").first();
+      const siteRow = await env.DB.prepare(
+        "SELECT value FROM site_config WHERE key = 'hero_config'",
+      ).first();
       if (siteRow && siteRow.value) {
         const hc = JSON.parse(siteRow.value);
         if (hc && hc.title) siteName = hc.title;
@@ -144,23 +171,27 @@ export async function onRequest(context) {
     } catch (_) {}
     html = html.replace(
       /<title>[\s\S]*?<\/title>/i,
-      '<title>' + escapeHtml(row.title || id) + ' | ' + escapeHtml(siteName) + '</title>'
+      "<title>" +
+        escapeHtml(row.title || id) +
+        " | " +
+        escapeHtml(siteName) +
+        "</title>",
     );
 
     return new Response(html, {
       status: 200,
       headers: {
-        'Content-Type': 'text/html; charset=utf-8',
-        'Cache-Control': 'no-store',
+        "Content-Type": "text/html; charset=utf-8",
+        "Cache-Control": "no-store",
       },
     });
   } catch (e) {
     // 任何意外，绝不抛到边缘（避免 1101）；降级为 404
-    console.error('[path] fatal', e && e.message, e && e.stack);
+    console.error("[path] fatal", e && e.message, e && e.stack);
     try {
       return notFound();
     } catch (_) {
-      return new Response('Not Found', { status: 404 });
+      return new Response("Not Found", { status: 404 });
     }
   }
 }

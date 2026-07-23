@@ -1,5 +1,5 @@
-import { useState, useRef, useEffect } from 'react';
-import { createPortal } from 'react-dom';
+import { useState, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
 
 export interface LightboxImage {
   src: string;
@@ -28,7 +28,13 @@ export default function ImageLightboxOverlay({
 
   const [zoomed, setZoomed] = useState(false);
   const [pan, setPan] = useState({ x: 0, y: 0 });
-  const dragRef = useRef<{ sx: number; sy: number; ox: number; oy: number; moved: boolean } | null>(null);
+  const dragRef = useRef<{
+    sx: number;
+    sy: number;
+    ox: number;
+    oy: number;
+    moved: boolean;
+  } | null>(null);
   const movedRef = useRef(false);
 
   // 切换图片时重置缩放与平移
@@ -38,7 +44,13 @@ export default function ImageLightboxOverlay({
   }, [currentIndex]);
 
   const onPointerDown = (e: React.PointerEvent) => {
-    dragRef.current = { sx: e.clientX, sy: e.clientY, ox: pan.x, oy: pan.y, moved: false };
+    dragRef.current = {
+      sx: e.clientX,
+      sy: e.clientY,
+      ox: pan.x,
+      oy: pan.y,
+      moved: false,
+    };
     movedRef.current = false;
   };
   const onPointerMove = (e: React.PointerEvent) => {
@@ -60,18 +72,28 @@ export default function ImageLightboxOverlay({
   const onImgClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (movedRef.current) return; // 拖动过则不切换
-    setZoomed(v => !v);
+    setZoomed((v) => !v);
     setPan({ x: 0, y: 0 });
   };
 
   const imgStyle: React.CSSProperties = zoomed
-    ? { transform: `translate(${pan.x}px, ${pan.y}px) scale(${ZOOM})`, transformOrigin: 'center center', cursor: 'grab' }
-    : { cursor: 'zoom-in' };
+    ? {
+        transform: `translate(${pan.x}px, ${pan.y}px) scale(${ZOOM})`,
+        transformOrigin: "center center",
+        cursor: "grab",
+      }
+    : { cursor: "zoom-in" };
 
   return createPortal(
-    <div className="fixed inset-0 z-[100] bg-black/95" onClick={onClose} role="dialog" aria-modal="true" aria-label="图片灯箱">
+    <div
+      className="fixed inset-0 z-[100] bg-black/95"
+      onClick={onClose}
+      role="dialog"
+      aria-modal="true"
+      aria-label="图片灯箱"
+    >
       <button
-        onClick={e => {
+        onClick={(e) => {
           e.stopPropagation();
           onClose();
         }}
@@ -84,13 +106,13 @@ export default function ImageLightboxOverlay({
       </span>
 
       <span className="absolute bottom-5 left-1/2 -translate-x-1/2 text-white/40 text-xs z-20 select-none">
-        {zoomed ? '再次点击还原' : '点击放大 · 拖动查看'}
+        {zoomed ? "再次点击还原" : "点击放大 · 拖动查看"}
       </span>
 
       {images.length > 1 && (
         <>
           <button
-            onClick={e => {
+            onClick={(e) => {
               e.stopPropagation();
               onPrev();
             }}
@@ -99,7 +121,7 @@ export default function ImageLightboxOverlay({
             ‹
           </button>
           <button
-            onClick={e => {
+            onClick={(e) => {
               e.stopPropagation();
               onNext();
             }}
@@ -113,7 +135,7 @@ export default function ImageLightboxOverlay({
       <div className="absolute inset-0 flex items-center justify-center">
         <img
           src={image.src}
-          alt={image.alt || ''}
+          alt={image.alt || ""}
           onClick={onImgClick}
           onPointerDown={onPointerDown}
           onPointerMove={onPointerMove}
@@ -125,6 +147,6 @@ export default function ImageLightboxOverlay({
         />
       </div>
     </div>,
-    document.body
+    document.body,
   );
 }

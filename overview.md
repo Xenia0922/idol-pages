@@ -19,13 +19,13 @@ npm run dev
 
 ## 技术栈
 
-| 层 | 技术 |
-|---|------|
-| 框架 | Astro 5（静态生成） |
-| UI | React 19 + Tailwind CSS 3 |
-| 后端 | Cloudflare Pages Functions |
-| 数据库 | Cloudflare D1（SQLite） |
-| 存储 | Cloudflare R2 |
+| 层     | 技术                       |
+| ------ | -------------------------- |
+| 框架   | Astro 5（静态生成）        |
+| UI     | React 19 + Tailwind CSS 3  |
+| 后端   | Cloudflare Pages Functions |
+| 数据库 | Cloudflare D1（SQLite）    |
+| 存储   | Cloudflare R2              |
 
 ## License
 

@@ -9,7 +9,9 @@ const DDL = `CREATE TABLE IF NOT EXISTS upload_log (ip TEXT, ts INTEGER, kind TE
 let ensured = false;
 async function ensure(env) {
   if (ensured) return;
-  await env.DB.prepare(DDL).run().catch(() => {});
+  await env.DB.prepare(DDL)
+    .run()
+    .catch(() => {});
   ensured = true;
 }
 
@@ -20,14 +22,15 @@ export async function rateAllow(env, ip, kind, limit, windowMs, n = 1) {
   try {
     await ensure(env);
     const since = Date.now() - windowMs;
-    const { results } = await env.DB
-      .prepare('SELECT COUNT(*) AS c FROM upload_log WHERE ip = ? AND kind = ? AND ts > ?')
+    const { results } = await env.DB.prepare(
+      "SELECT COUNT(*) AS c FROM upload_log WHERE ip = ? AND kind = ? AND ts > ?",
+    )
       .bind(ip, kind, since)
       .all();
     const count = (results && results[0] && results[0].c) || 0;
     return count + n <= limit;
   } catch (e) {
-    console.error('[rate] check failed, fail-open:', e.message);
+    console.error("[rate] check failed, fail-open:", e.message);
     return true;
   }
 }
@@ -38,12 +41,19 @@ export async function rateLog(env, ip, kind, n = 1) {
     await ensure(env);
     const now = Date.now();
     for (let i = 0; i < n; i++) {
-      await env.DB.prepare('INSERT INTO upload_log (ip, ts, kind) VALUES (?, ?, ?)').bind(ip, now, kind).run();
+      await env.DB.prepare(
+        "INSERT INTO upload_log (ip, ts, kind) VALUES (?, ?, ?)",
+      )
+        .bind(ip, now, kind)
+        .run();
     }
     // 轻量清理：1 小时前的记录
     const cutoff = now - 3600 * 1000;
-    await env.DB.prepare('DELETE FROM upload_log WHERE ts < ?').bind(cutoff).run().catch(() => {});
+    await env.DB.prepare("DELETE FROM upload_log WHERE ts < ?")
+      .bind(cutoff)
+      .run()
+      .catch(() => {});
   } catch (e) {
-    console.error('[rate] log failed:', e.message);
+    console.error("[rate] log failed:", e.message);
   }
 }

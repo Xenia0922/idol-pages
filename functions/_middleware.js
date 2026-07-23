@@ -10,9 +10,9 @@
  *   - galleryPhotos   画廊（成员分组图）
  *   - featuredFan     画廊「粉丝精选」区（已由 R2 解析出 url，免二次 fetch）
  */
-import { ensureEvents } from './_seed.js';
-import { listPhotosData } from './api/photos.js';
-import { marked } from 'marked';
+import { ensureEvents } from "./_seed.js";
+import { listPhotosData } from "./api/photos.js";
+import { marked } from "marked";
 
 const EVENT_DDL = `CREATE TABLE IF NOT EXISTS events (id TEXT PRIMARY KEY, date TEXT, time TEXT, title TEXT, venue TEXT, performers TEXT, status TEXT, image TEXT, body TEXT, created_at TEXT)`;
 const MEMBER_DDL = `CREATE TABLE IF NOT EXISTS members (id TEXT PRIMARY KEY, name TEXT, nameJP TEXT, color TEXT, emoji TEXT, birthday TEXT, constellation TEXT, status TEXT, image TEXT, gallery TEXT, weibo TEXT, weiboName TEXT, weiboDesc TEXT, intro TEXT, sort_order INTEGER DEFAULT 0)`;
@@ -34,12 +34,12 @@ async function ensureTables(env) {
 
 async function fetchEvents(env) {
   const { results } = await env.DB.prepare(
-    'SELECT id,date,time,title,venue,performers,status,image FROM events ORDER BY date DESC'
+    "SELECT id,date,time,title,venue,performers,status,image FROM events ORDER BY date DESC",
   ).all();
   return (results || []).map((r) => {
     let performers = [];
     try {
-      performers = JSON.parse(r.performers || '[]');
+      performers = JSON.parse(r.performers || "[]");
     } catch {}
     return { ...r, performers };
   });
@@ -53,16 +53,25 @@ async function fetchPageData(path, env) {
 
   // 所有页面都可能需要 site_config (SiteBits 组件)
   try {
-    const { results } = await env.DB.prepare('SELECT key, value FROM site_config').all();
+    const { results } = await env.DB.prepare(
+      "SELECT key, value FROM site_config",
+    ).all();
     if (results && results.length) {
       const cfg = {};
       for (const r of results) {
         try {
-          cfg[r.key] = ['tokuten_rules', 'tokuten_images', 'featured_square', 'hero_config', 'blocked_words'].includes(r.key)
+          cfg[r.key] = [
+            "tokuten_rules",
+            "tokuten_images",
+            "featured_square",
+            "hero_config",
+            "blocked_words",
+          ].includes(r.key)
             ? JSON.parse(r.value)
             : r.value;
           // 防御旧 bug 数据：hero_config 曾被 updateConfig 存为 '[]'，强制转为 {}
-          if (r.key === 'hero_config' && Array.isArray(cfg[r.key])) cfg[r.key] = {};
+          if (r.key === "hero_config" && Array.isArray(cfg[r.key]))
+            cfg[r.key] = {};
         } catch {
           cfg[r.key] = r.value;
         }
@@ -72,14 +81,20 @@ async function fetchPageData(path, env) {
   } catch {}
 
   // 首页 / 成员页 / 日程页 / 画廊页 都需要 events
-  if (path === '/' || path === '/members' || path === '/gallery' || path === '/fans' || path.startsWith('/schedule')) {
+  if (
+    path === "/" ||
+    path === "/members" ||
+    path === "/gallery" ||
+    path === "/fans" ||
+    path.startsWith("/schedule")
+  ) {
     try {
       let events = null;
       try {
         events = await fetchEvents(env);
       } catch (e) {
         // D1 偶发超时/错误，重试一次
-        console.error('[middleware] fetchEvents first try failed:', e.message);
+        console.error("[middleware] fetchEvents first try failed:", e.message);
         events = await fetchEvents(env);
       }
       // 全新 D1：首次访问时确保已播种真实数据，再取一次
@@ -89,22 +104,20 @@ async function fetchPageData(path, env) {
       }
       data.events = events || [];
     } catch (e) {
-      console.error('[middleware] fetchEvents all retries failed:', e.message);
+      console.error("[middleware] fetchEvents all retries failed:", e.message);
     }
   }
 
   // 首页 / 成员页 需要 members
-  if (path === '/' || path === '/members' || path.startsWith('/members/')) {
+  if (path === "/" || path === "/members" || path.startsWith("/members/")) {
     try {
-      const { results } = await env.DB
-        .prepare(
-          "SELECT id,name,nameJP,color,emoji,birthday,constellation,status,image,gallery,weibo,weiboName,weiboDesc,intro,sort_order FROM members ORDER BY sort_order ASC, id ASC"
-        )
-        .all();
+      const { results } = await env.DB.prepare(
+        "SELECT id,name,nameJP,color,emoji,birthday,constellation,status,image,gallery,weibo,weiboName,weiboDesc,intro,sort_order FROM members ORDER BY sort_order ASC, id ASC",
+      ).all();
       data.members = (results || []).map((r) => {
         let gallery = [];
         try {
-          gallery = JSON.parse(r.gallery || '[]');
+          gallery = JSON.parse(r.gallery || "[]");
         } catch {}
         return { ...r, gallery };
       });
@@ -112,30 +125,32 @@ async function fetchPageData(path, env) {
   }
 
   // 画廊页 / 粉丝广场页需要成员 meta（分组显示/筛选）
-  if (path === '/gallery' || path === '/fans') {
+  if (path === "/gallery" || path === "/fans") {
     try {
-      const { results } = await env.DB
-        .prepare("SELECT id,name,emoji,color FROM members WHERE status='active' ORDER BY sort_order ASC, id ASC")
-        .all();
+      const { results } = await env.DB.prepare(
+        "SELECT id,name,emoji,color FROM members WHERE status='active' ORDER BY sort_order ASC, id ASC",
+      ).all();
       data.membersMeta = results || [];
     } catch {}
   }
 
   // 画廊页需要 gallery photos + 粉丝精选（已解析 url，免二次 fetch）
-  if (path === '/gallery') {
+  if (path === "/gallery") {
     try {
-      const { results } = await env.DB
-        .prepare('SELECT id,url,member FROM gallery_photos ORDER BY sort ASC, created_at ASC')
-        .all();
+      const { results } = await env.DB.prepare(
+        "SELECT id,url,member FROM gallery_photos ORDER BY sort ASC, created_at ASC",
+      ).all();
       data.galleryPhotos = results || [];
     } catch {}
     try {
-      const fs = await env.DB
-        .prepare("SELECT value FROM site_config WHERE key='featured_square'")
-        .first();
+      const fs = await env.DB.prepare(
+        "SELECT value FROM site_config WHERE key='featured_square'",
+      ).first();
       const featuredSquare = fs?.value ? JSON.parse(fs.value) : [];
       const featuredKeys = Array.isArray(featuredSquare)
-        ? featuredSquare.map((e) => (typeof e === 'string' ? e : e.key)).filter(Boolean)
+        ? featuredSquare
+            .map((e) => (typeof e === "string" ? e : e.key))
+            .filter(Boolean)
         : [];
       if (featuredKeys.length) {
         const photos = await listPhotosData(env);
@@ -149,13 +164,17 @@ async function fetchPageData(path, env) {
 
   // 日程详情页：注入单条完整 event（含 body + bodyHtml），EventDetail 直接渲染，无需 fetch、无需客户端异步加载 marked
   const m = path.match(/^\/schedule\/([\w-]+)$/);
-  if (m && m[1] !== 'index') {
+  if (m && m[1] !== "index") {
     try {
-      const { results } = await env.DB.prepare('SELECT * FROM events WHERE id = ?').bind(m[1]).all();
+      const { results } = await env.DB.prepare(
+        "SELECT * FROM events WHERE id = ?",
+      )
+        .bind(m[1])
+        .all();
       if (results && results.length) {
         const row = results[0];
         try {
-          row.performers = JSON.parse(row.performers || '[]');
+          row.performers = JSON.parse(row.performers || "[]");
         } catch {
           row.performers = [];
         }
@@ -164,10 +183,10 @@ async function fetchPageData(path, env) {
           try {
             row.bodyHtml = marked.parse(row.body, { async: false });
           } catch {
-            row.bodyHtml = '';
+            row.bodyHtml = "";
           }
         } else {
-          row.bodyHtml = '';
+          row.bodyHtml = "";
         }
         data.event = row;
       }
@@ -178,8 +197,11 @@ async function fetchPageData(path, env) {
 }
 
 function escapeHtml(s) {
-  return String(s == null ? '' : s)
-    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  return String(s == null ? "" : s)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
 }
 
 // hero 栏可自定义：对 `/` 路径，按 D1 hero_config 替换 data-hero 元素（首屏直出最新值，无闪烁）。
@@ -187,23 +209,34 @@ function escapeHtml(s) {
 function applyHero(html, hero, weiboDesc) {
   if (!hero) return html;
   if (hero.title) {
-    html = html.replace(/(<[^>]*data-hero="title"[^>]*>)([\s\S]*?)(<\/[a-z0-9]+>)/i, (m, a, _c, b) => a + escapeHtml(hero.title) + b);
+    html = html.replace(
+      /(<[^>]*data-hero="title"[^>]*>)([\s\S]*?)(<\/[a-z0-9]+>)/i,
+      (m, a, _c, b) => a + escapeHtml(hero.title) + b,
+    );
   }
   if (hero.subtitle) {
-    html = html.replace(/(<[^>]*data-hero="subtitle"[^>]*>)([\s\S]*?)(<\/[a-z0-9]+>)/i, (m, a, _c, b) => a + escapeHtml(hero.subtitle) + b);
+    html = html.replace(
+      /(<[^>]*data-hero="subtitle"[^>]*>)([\s\S]*?)(<\/[a-z0-9]+>)/i,
+      (m, a, _c, b) => a + escapeHtml(hero.subtitle) + b,
+    );
   }
   // desc 复用 weibo_desc
   if (weiboDesc) {
-    html = html.replace(/(<[^>]*data-hero="desc"[^>]*>)([\s\S]*?)(<\/[a-z0-9]+>)/i, (m, a, _c, b) => a + escapeHtml(weiboDesc) + b);
+    html = html.replace(
+      /(<[^>]*data-hero="desc"[^>]*>)([\s\S]*?)(<\/[a-z0-9]+>)/i,
+      (m, a, _c, b) => a + escapeHtml(weiboDesc) + b,
+    );
   }
   if (hero.logo) {
     // src 可能在 data-hero 前或后，先匹配整个 img 标签再替换其 src（与属性顺序无关）
-    html = html.replace(/<img[^>]*data-hero="logo"[^>]*>/i, (m) => m.replace(/\bsrc="[^"]*"/i, `src="${escapeHtml(hero.logo)}"`));
+    html = html.replace(/<img[^>]*data-hero="logo"[^>]*>/i, (m) =>
+      m.replace(/\bsrc="[^"]*"/i, `src="${escapeHtml(hero.logo)}"`),
+    );
   }
   if (hero.bg || hero.bgOpacity != null || hero.bgPosition != null) {
     // bg img：替换 src + 替换 style（--bg-opacity + object-position）
     const opacity = hero.bgOpacity != null ? hero.bgOpacity : 0.22;
-    const pos = hero.bgPosition || 'center center';
+    const pos = hero.bgPosition || "center center";
     html = html.replace(/<img[^>]*data-hero="bg"[^>]*>/i, (m) => {
       let out = m;
       if (hero.bg) {
@@ -229,10 +262,10 @@ export async function onRequest(context) {
 
   // 只处理 HTML 页面请求
   const isPage =
-    !path.startsWith('/api/') &&
-    !path.startsWith('/_astro/') &&
+    !path.startsWith("/api/") &&
+    !path.startsWith("/_astro/") &&
     !path.match(/\.(js|css|png|jpg|jpeg|webp|svg|ico|json|xml|txt|woff2?)$/i) &&
-    !path.startsWith('/admin');
+    !path.startsWith("/admin");
 
   if (!isPage) return next();
 
@@ -240,8 +273,8 @@ export async function onRequest(context) {
   const response = await next();
 
   // 只处理 HTML 响应
-  const ct = response.headers.get('Content-Type') || '';
-  if (!ct.includes('text/html')) return response;
+  const ct = response.headers.get("Content-Type") || "";
+  if (!ct.includes("text/html")) return response;
 
   try {
     await ensureTables(env);
@@ -251,23 +284,34 @@ export async function onRequest(context) {
 
     // 注入数据脚本（转义 < 防止数据含 </script> 破坏 HTML，JSON.parse 自动还原）
     const html = await response.text();
-    const dataStr = JSON.stringify(pageData).replace(/</g, '\\u003c');
+    const dataStr = JSON.stringify(pageData).replace(/</g, "\\u003c");
     const dataScript = `<script>window.__SSR_DATA__=${dataStr};</script>`;
-    let modified = html.replace('</body>', dataScript + '</body>');
+    let modified = html.replace("</body>", dataScript + "</body>");
     // hero 栏可自定义：对 `/` 路径替换 data-hero 元素（首屏直出 D1 最新值，无闪烁）
-    if (path === '/' && pageData.siteConfig && pageData.siteConfig.hero_config) {
-      modified = applyHero(modified, pageData.siteConfig.hero_config, pageData.siteConfig.weibo_desc);
+    if (
+      path === "/" &&
+      pageData.siteConfig &&
+      pageData.siteConfig.hero_config
+    ) {
+      modified = applyHero(
+        modified,
+        pageData.siteConfig.hero_config,
+        pageData.siteConfig.weibo_desc,
+      );
     }
 
     const respHeaders = new Headers(response.headers);
-    respHeaders.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+    respHeaders.set(
+      "Strict-Transport-Security",
+      "max-age=31536000; includeSubDomains",
+    );
     return new Response(modified, {
       status: response.status,
       statusText: response.statusText,
       headers: respHeaders,
     });
   } catch (e) {
-    console.error('[middleware] error:', e.message);
+    console.error("[middleware] error:", e.message);
     return response;
   }
 }

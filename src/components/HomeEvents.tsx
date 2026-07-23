@@ -1,4 +1,4 @@
-import EventCardGrid, { type EventRow } from './EventCardGrid';
+import EventCardGrid, { type EventRow } from "./EventCardGrid";
 
 export type { EventRow };
 

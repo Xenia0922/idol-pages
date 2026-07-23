@@ -2,12 +2,20 @@
   "name": "idol-fansite-template",
   "type": "module",
   "version": "1.0.0",
-  "description": "\u5730\u4e0b\u5076\u50cf\u5e94\u63f4\u7ad9\u6a21\u677f",
+  "description": "地下偶像应援站模板",
   "scripts": {
     "dev": "astro dev",
     "start": "astro dev",
     "build": "astro build",
-    "preview": "astro preview"
+    "preview": "astro preview",
+    "build:analyze": "ANALYZE=true astro build",
+    "analyze": "bash scripts/analyze-bundle.sh",
+    "lint": "astro check",
+    "typecheck": "tsc --noEmit",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "deploy:preview": "wrangler pages deploy dist --project-name=idol-pages --branch=preview",
+    "deploy:prod": "wrangler pages deploy dist --project-name=idol-pages"
   },
   "dependencies": {
     "@astrojs/react": "^4.2.4",
@@ -23,6 +31,10 @@
   "devDependencies": {
     "@types/react": "^19.1.2",
     "@types/react-dom": "^19.1.5",
+    "astro-compress": "^2.4.1",
+    "prettier": "^3.9.6",
+    "prettier-plugin-astro": "^0.14.1",
+    "sharp": "^0.35.3",
     "typescript": "^5.8.3",
     "wrangler": "^4.107.0"
   }

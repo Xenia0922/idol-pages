@@ -1,7 +1,7 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
-import ImageLightboxOverlay from './ImageLightboxOverlay';
-import Skeleton from './Skeleton';
-import SkeletonSwap from './SkeletonSwap';
+import { useState, useEffect, useCallback, useMemo } from "react";
+import ImageLightboxOverlay from "./ImageLightboxOverlay";
+import Skeleton from "./Skeleton";
+import SkeletonSwap from "./SkeletonSwap";
 
 interface Photo {
   id: string;
@@ -24,9 +24,10 @@ interface MemberMeta {
 }
 
 export default function GalleryGrid() {
-  const [filter, setFilter] = useState('all');
+  const [filter, setFilter] = useState("all");
   const [lightboxIdx, setLightboxIdx] = useState<number | null>(null);
-  const ssr = typeof window !== 'undefined' ? (window as any).__SSR_DATA__ : null;
+  const ssr =
+    typeof window !== "undefined" ? (window as any).__SSR_DATA__ : null;
   // 骨架优先：初始空 + loading，reload 中按 SSR > fetch 填充（消除 hydration 不匹配）
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [featuredFan, setFeaturedFan] = useState<FanPhoto[]>([]);
@@ -39,9 +40,17 @@ export default function GalleryGrid() {
       setMembersMeta(ssr.membersMeta);
     } else {
       try {
-        const mr = await fetch('/api/members');
+        const mr = await fetch("/api/members");
         const md = await mr.json();
-        if (Array.isArray(md)) setMembersMeta(md.map((m: any) => ({ id: m.id, name: m.name, emoji: m.emoji || '', color: m.color || '' })));
+        if (Array.isArray(md))
+          setMembersMeta(
+            md.map((m: any) => ({
+              id: m.id,
+              name: m.name,
+              emoji: m.emoji || "",
+              color: m.color || "",
+            })),
+          );
       } catch {}
     }
     if (ssr?.galleryPhotos) {
@@ -54,11 +63,13 @@ export default function GalleryGrid() {
       }
       // 兼容旧部署：SSR 仅有 galleryPhotos，未注入 featuredFan，回退补拉
       try {
-        const photosRes = await fetch('/api/photos');
+        const photosRes = await fetch("/api/photos");
         const photosData = await photosRes.json();
         const raw = ssr.featuredSquare || [];
         const featuredKeys: string[] = Array.isArray(raw)
-          ? raw.map((e: string | { key: string }) => (typeof e === 'string' ? e : e.key))
+          ? raw.map((e: string | { key: string }) =>
+              typeof e === "string" ? e : e.key,
+            )
           : [];
         if (Array.isArray(photosData) && featuredKeys.length > 0) {
           const keySet = new Set(featuredKeys);
@@ -70,9 +81,9 @@ export default function GalleryGrid() {
     }
     try {
       const [galleryRes, photosRes, siteRes] = await Promise.all([
-        fetch('/api/gallery'),
-        fetch('/api/photos'),
-        fetch('/api/site'),
+        fetch("/api/gallery"),
+        fetch("/api/photos"),
+        fetch("/api/site"),
       ]);
       const galleryData = await galleryRes.json();
       const photosData = await photosRes.json();
@@ -84,11 +95,16 @@ export default function GalleryGrid() {
         const featuredGalleryIds = new Set<string>();
         if (Array.isArray(raw)) {
           for (const e of raw) {
-            if (typeof e !== 'string' && e.galleryId) featuredGalleryIds.add(e.galleryId);
+            if (typeof e !== "string" && e.galleryId)
+              featuredGalleryIds.add(e.galleryId);
           }
         }
         if (featuredGalleryIds.size > 0) {
-          setPhotos(galleryData.photos.filter((p: Photo) => !featuredGalleryIds.has(p.id)));
+          setPhotos(
+            galleryData.photos.filter(
+              (p: Photo) => !featuredGalleryIds.has(p.id),
+            ),
+          );
         } else {
           setPhotos(galleryData.photos);
         }
@@ -97,7 +113,9 @@ export default function GalleryGrid() {
       // 广场返图精选：兼容旧格式 string[] 和新格式 { key, galleryId }[]
       const raw2 = siteData.featured_square || [];
       const featuredKeys: string[] = Array.isArray(raw2)
-        ? raw2.map((e: string | { key: string }) => (typeof e === 'string' ? e : e.key))
+        ? raw2.map((e: string | { key: string }) =>
+            typeof e === "string" ? e : e.key,
+          )
         : [];
       if (Array.isArray(photosData) && featuredKeys.length > 0) {
         const keySet = new Set(featuredKeys);
@@ -112,7 +130,9 @@ export default function GalleryGrid() {
     setLoading(false);
   }, []);
 
-  useEffect(() => { reload(); }, [reload]);
+  useEffect(() => {
+    reload();
+  }, [reload]);
 
   const metaMap = useMemo(() => {
     const m = new Map<string, MemberMeta>();
@@ -123,65 +143,103 @@ export default function GalleryGrid() {
   const groups = useMemo(() => {
     const map = new Map<string, Photo[]>();
     for (const p of photos) {
-      const key = metaMap.has(p.member) ? p.member : '__other__';
+      const key = metaMap.has(p.member) ? p.member : "__other__";
       if (!map.has(key)) map.set(key, []);
       map.get(key)!.push(p);
     }
-    const ordered: { id: string; name: string; emoji: string; color: string; items: Photo[] }[] = [];
+    const ordered: {
+      id: string;
+      name: string;
+      emoji: string;
+      color: string;
+      items: Photo[];
+    }[] = [];
     for (const mm of membersMeta) {
-      if (map.has(mm.id)) ordered.push({ id: mm.id, name: mm.name, emoji: mm.emoji, color: mm.color, items: map.get(mm.id)! });
+      if (map.has(mm.id))
+        ordered.push({
+          id: mm.id,
+          name: mm.name,
+          emoji: mm.emoji,
+          color: mm.color,
+          items: map.get(mm.id)!,
+        });
     }
-    if (map.has('__other__')) ordered.push({ id: '__other__', name: '其他', emoji: '⭐', color: '#e83e8c', items: map.get('__other__')! });
+    if (map.has("__other__"))
+      ordered.push({
+        id: "__other__",
+        name: "其他",
+        emoji: "⭐",
+        color: "#e83e8c",
+        items: map.get("__other__")!,
+      });
     return ordered;
   }, [photos, metaMap, membersMeta]);
 
   const flat = useMemo(() => groups.flatMap((g) => g.items), [groups]);
   const visibleFlat = useMemo(
-    () => (filter === 'all' ? flat : flat.filter((p) => p.member === filter)),
-    [filter, flat]
+    () => (filter === "all" ? flat : flat.filter((p) => p.member === filter)),
+    [filter, flat],
   );
-  const lightboxImages = useMemo(() => visibleFlat.map((p) => ({ src: p.url })), [visibleFlat]);
+  const lightboxImages = useMemo(
+    () => visibleFlat.map((p) => ({ src: p.url })),
+    [visibleFlat],
+  );
 
   const close = useCallback(() => setLightboxIdx(null), []);
   const prev = useCallback(
-    () => setLightboxIdx((i) => (i !== null ? (i - 1 + visibleFlat.length) % visibleFlat.length : null)),
-    [visibleFlat.length]
+    () =>
+      setLightboxIdx((i) =>
+        i !== null ? (i - 1 + visibleFlat.length) % visibleFlat.length : null,
+      ),
+    [visibleFlat.length],
   );
   const next = useCallback(
-    () => setLightboxIdx((i) => (i !== null ? (i + 1) % visibleFlat.length : null)),
-    [visibleFlat.length]
+    () =>
+      setLightboxIdx((i) => (i !== null ? (i + 1) % visibleFlat.length : null)),
+    [visibleFlat.length],
   );
 
   useEffect(() => {
     if (lightboxIdx === null) return;
     const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') close();
-      if (e.key === 'ArrowLeft') prev();
-      if (e.key === 'ArrowRight') next();
+      if (e.key === "Escape") close();
+      if (e.key === "ArrowLeft") prev();
+      if (e.key === "ArrowRight") next();
     };
-    window.addEventListener('keydown', handler);
-    return () => window.removeEventListener('keydown', handler);
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
   }, [lightboxIdx, close, prev, next]);
 
   const filters = useMemo(
     () => [
-      { key: 'all', label: '全部', emoji: '⭐', color: '#e83e8c' },
-      ...groups.map((g) => ({ key: g.id, label: g.name, emoji: g.emoji, color: g.color })),
+      { key: "all", label: "全部", emoji: "⭐", color: "#e83e8c" },
+      ...groups.map((g) => ({
+        key: g.id,
+        label: g.name,
+        emoji: g.emoji,
+        color: g.color,
+      })),
     ],
-    [groups]
+    [groups],
   );
 
   const idxOf = (id: string) => visibleFlat.findIndex((p) => p.id === id);
 
   // 精选区也响应成员筛选
   const visibleFeaturedFan = useMemo(
-    () => (filter === 'all' ? featuredFan : featuredFan.filter((p) => p.member === filter)),
-    [featuredFan, filter]
+    () =>
+      filter === "all"
+        ? featuredFan
+        : featuredFan.filter((p) => p.member === filter),
+    [featuredFan, filter],
   );
 
   // 精选 fan 照片的灯箱
   const [fanLightboxIdx, setFanLightboxIdx] = useState<number | null>(null);
-  const fanLightboxImages = useMemo(() => visibleFeaturedFan.map((p) => ({ src: p.url })), [visibleFeaturedFan]);
+  const fanLightboxImages = useMemo(
+    () => visibleFeaturedFan.map((p) => ({ src: p.url })),
+    [visibleFeaturedFan],
+  );
 
   return (
     <>
@@ -190,8 +248,11 @@ export default function GalleryGrid() {
         {filters.map((f) => (
           <button
             key={f.key}
-            onClick={() => { setFilter(f.key); setLightboxIdx(null); }}
-            className={`inline-flex items-center gap-1.5 px-4 py-2.5 rounded-full text-sm font-medium transition-all duration-200 ${filter === f.key ? 'text-white shadow-md' : 'text-gray-500 bg-gray-100 hover:bg-gray-200'}`}
+            onClick={() => {
+              setFilter(f.key);
+              setLightboxIdx(null);
+            }}
+            className={`inline-flex items-center gap-1.5 px-4 py-2.5 rounded-full text-sm font-medium transition-all duration-200 ${filter === f.key ? "text-white shadow-md" : "text-gray-500 bg-gray-100 hover:bg-gray-200"}`}
             style={filter === f.key ? { backgroundColor: f.color } : {}}
             aria-pressed={filter === f.key}
           >
@@ -205,7 +266,10 @@ export default function GalleryGrid() {
       <SkeletonSwap
         loading={loading}
         skeleton={
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3" aria-hidden="true">
+          <div
+            className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3"
+            aria-hidden="true"
+          >
             {Array.from({ length: 8 }).map((_, i) => (
               <Skeleton key={i} className="aspect-[4/5] rounded-3xl" />
             ))}
@@ -214,15 +278,20 @@ export default function GalleryGrid() {
       >
         <div className="space-y-8">
           {groups
-            .filter((g) => filter === 'all' || g.id === filter)
+            .filter((g) => filter === "all" || g.id === filter)
             .map((g) => (
               <div key={g.id}>
-                {filter === 'all' && (
+                {filter === "all" && (
                   <div className="flex items-center gap-3 mb-3">
-                    <span className="text-sm font-bold" style={{ color: g.color }}>
+                    <span
+                      className="text-sm font-bold"
+                      style={{ color: g.color }}
+                    >
                       {g.emoji} {g.name}
                     </span>
-                    <span className="text-xs text-gray-400">{g.items.length} 张</span>
+                    <span className="text-xs text-gray-400">
+                      {g.items.length} 张
+                    </span>
                   </div>
                 )}
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
@@ -247,7 +316,11 @@ export default function GalleryGrid() {
                 </div>
               </div>
             ))}
-          {photos.length === 0 && <div className="text-center py-16 text-gray-400">画廊还空着，敬请期待</div>}
+          {photos.length === 0 && (
+            <div className="text-center py-16 text-gray-400">
+              画廊还空着，敬请期待
+            </div>
+          )}
         </div>
       </SkeletonSwap>
 
@@ -255,8 +328,12 @@ export default function GalleryGrid() {
       {!loading && visibleFeaturedFan.length > 0 && (
         <div className="mt-12">
           <div className="flex items-center gap-3 mb-4">
-            <span className="text-sm font-bold text-[var(--accent)]">粉丝精选</span>
-            <span className="text-xs text-gray-400">{visibleFeaturedFan.length} 张</span>
+            <span className="text-sm font-bold text-[var(--accent)]">
+              粉丝精选
+            </span>
+            <span className="text-xs text-gray-400">
+              {visibleFeaturedFan.length} 张
+            </span>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
             {visibleFeaturedFan.map((p, i) => (
@@ -293,8 +370,18 @@ export default function GalleryGrid() {
           images={fanLightboxImages}
           currentIndex={fanLightboxIdx}
           onClose={() => setFanLightboxIdx(null)}
-          onPrev={() => setFanLightboxIdx((i) => (i !== null ? (i - 1 + featuredFan.length) % featuredFan.length : null))}
-          onNext={() => setFanLightboxIdx((i) => (i !== null ? (i + 1) % featuredFan.length : null))}
+          onPrev={() =>
+            setFanLightboxIdx((i) =>
+              i !== null
+                ? (i - 1 + featuredFan.length) % featuredFan.length
+                : null,
+            )
+          }
+          onNext={() =>
+            setFanLightboxIdx((i) =>
+              i !== null ? (i + 1) % featuredFan.length : null,
+            )
+          }
         />
       )}
     </>

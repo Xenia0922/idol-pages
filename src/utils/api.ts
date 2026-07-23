@@ -11,7 +11,7 @@ export class ApiError extends Error {
   status: number;
   constructor(message: string, status: number) {
     super(message);
-    this.name = 'ApiError';
+    this.name = "ApiError";
     this.status = status;
   }
 }
@@ -19,7 +19,10 @@ export class ApiError extends Error {
 /**
  * 带超时的 fetch 封装，自动解析 JSON，统一错误处理。
  */
-export async function apiFetch<T = unknown>(url: string, options?: RequestInit & { timeout?: number }): Promise<T> {
+export async function apiFetch<T = unknown>(
+  url: string,
+  options?: RequestInit & { timeout?: number },
+): Promise<T> {
   const { timeout = DEFAULT_TIMEOUT, ...fetchOptions } = options || {};
 
   const controller = new AbortController();
@@ -40,10 +43,10 @@ export async function apiFetch<T = unknown>(url: string, options?: RequestInit &
     return data as T;
   } catch (e) {
     if (e instanceof ApiError) throw e;
-    if ((e as Error).name === 'AbortError') {
-      throw new ApiError('请求超时', 408);
+    if ((e as Error).name === "AbortError") {
+      throw new ApiError("请求超时", 408);
     }
-    throw new ApiError('网络错误，请稍后重试', 0);
+    throw new ApiError("网络错误，请稍后重试", 0);
   } finally {
     clearTimeout(timer);
   }
@@ -53,8 +56,8 @@ export async function apiFetch<T = unknown>(url: string, options?: RequestInit &
  * 带管理暗号的请求头（仅在浏览器环境有效）。
  */
 export function adminHeaders(): Record<string, string> {
-  if (typeof window === 'undefined') return {};
-  return { 'x-admin-code': localStorage.getItem('fansite-admin') || '' };
+  if (typeof window === "undefined") return {};
+  return { "x-admin-code": localStorage.getItem("fansite-admin") || "" };
 }
 
 // ---------- 类型定义 ----------
@@ -142,35 +145,39 @@ export interface PhotoData {
 // ---------- API 函数 ----------
 
 export function fetchMembers(all?: boolean) {
-  const url = all ? '/api/members?all=1' : '/api/members';
+  const url = all ? "/api/members?all=1" : "/api/members";
   return apiFetch<MemberInfo[]>(url, {
     headers: all ? adminHeaders() : undefined,
   });
 }
 
 export function fetchEvents() {
-  return apiFetch<EventData[]>('/api/events');
+  return apiFetch<EventData[]>("/api/events");
 }
 
 export function fetchSiteConfig() {
-  return apiFetch<SiteConfig>('/api/site');
+  return apiFetch<SiteConfig>("/api/site");
 }
 
 export function fetchGallery() {
-  return apiFetch<{ photos: GalleryPhotoData[]; featured: GalleryPhotoData[]; isAdmin: boolean }>('/api/gallery');
+  return apiFetch<{
+    photos: GalleryPhotoData[];
+    featured: GalleryPhotoData[];
+    isAdmin: boolean;
+  }>("/api/gallery");
 }
 
 export function fetchMessages() {
-  return apiFetch<MessageData[]>('/api/messages');
+  return apiFetch<MessageData[]>("/api/messages");
 }
 
 export function fetchRecruits(all?: boolean) {
-  const url = all ? '/api/recruits?all=1' : '/api/recruits';
+  const url = all ? "/api/recruits?all=1" : "/api/recruits";
   return apiFetch<RecruitData[]>(url, {
     headers: all ? adminHeaders() : undefined,
   });
 }
 
 export function fetchPhotos() {
-  return apiFetch<PhotoData[]>('/api/photos');
+  return apiFetch<PhotoData[]>("/api/photos");
 }

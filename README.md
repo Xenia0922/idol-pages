@@ -8,15 +8,15 @@
 
 ## 功能
 
-| 模块 | 说明 |
-|------|------|
-| 成员 | 列表 / 详情 / 成员色主题切换 |
+| 模块 | 说明                                    |
+| ---- | --------------------------------------- |
+| 成员 | 列表 / 详情 / 成员色主题切换            |
 | 日程 | 即将到来 / 过往行程 / Markdown 详情正文 |
-| 画廊 | 官方精选照片 + 灯箱浏览 |
-| 广场 | 留言板 + 粉丝返图上传 + 审核流程 |
-| 特典 | 特典规则展示 |
-| 后台 | 可视化编辑所有内容，无需改代码 |
-| 其他 | 暗色模式 / 移动端 / SEO / RSS |
+| 画廊 | 官方精选照片 + 灯箱浏览                 |
+| 广场 | 留言板 + 粉丝返图上传 + 审核流程        |
+| 特典 | 特典规则展示                            |
+| 后台 | 可视化编辑所有内容，无需改代码          |
+| 其他 | 暗色模式 / 移动端 / SEO / RSS           |
 
 ## 快速开始
 
@@ -41,15 +41,15 @@ npm run dev          # http://localhost:4321
 
 ### 替换图片
 
-| 文件 | 说明 | 建议 |
-|------|------|------|
-| `public/logo.png` | 站点 Logo | 256×256 圆形 |
-| `public/hero-bg.webp` | 首页 Hero 背景 | 1920×1080 |
-| `public/favicon.ico` | 浏览器图标 | 32×32 |
-| `public/og-image.png` | 社交分享图 | 1200×630 |
-| `public/apple-touch-icon.png` | iOS 桌面图标 | 180×180 |
-| `public/images/members/{id}/*.webp` | 成员照片 | 800×800 以上 .webp |
-| `public/images/events/*.webp` | 活动封面 | 1200×630 .webp |
+| 文件                                | 说明           | 建议               |
+| ----------------------------------- | -------------- | ------------------ |
+| `public/logo.png`                   | 站点 Logo      | 256×256 圆形       |
+| `public/hero-bg.webp`               | 首页 Hero 背景 | 1920×1080          |
+| `public/favicon.ico`                | 浏览器图标     | 32×32              |
+| `public/og-image.png`               | 社交分享图     | 1200×630           |
+| `public/apple-touch-icon.png`       | iOS 桌面图标   | 180×180            |
+| `public/images/members/{id}/*.webp` | 成员照片       | 800×800 以上 .webp |
+| `public/images/events/*.webp`       | 活动封面       | 1200×630 .webp     |
 
 > 图片用 .webp 格式，单张 50–100KB。成员照片按 `成员id_01.webp`、`成员id_02.webp` 命名。
 
@@ -72,6 +72,7 @@ Cloudflare Dashboard → R2 → Create bucket（名称随意，如 `fansite-phot
 Workers & Pages → Create → Pages → Connect to Git → 选你的仓库
 
 构建配置：
+
 - Build command: `npm run build`
 - Output directory: `dist`
 
@@ -79,20 +80,20 @@ Workers & Pages → Create → Pages → Connect to Git → 选你的仓库
 
 Pages 项目 → Settings → Bindings：
 
-| 类型 | 变量名 | 值 |
-|------|--------|-----|
-| D1 database | `DB` | 第一步创建的数据库 |
-| R2 bucket | `PHOTOS` | 第二步创建的存储桶 |
+| 类型        | 变量名   | 值                 |
+| ----------- | -------- | ------------------ |
+| D1 database | `DB`     | 第一步创建的数据库 |
+| R2 bucket   | `PHOTOS` | 第二步创建的存储桶 |
 
 ### 5. 配置环境变量
 
 Settings → Environment variables：
 
-| 变量名 | 说明 |
-|--------|------|
-| `ADMIN_CODE` | 后台登录密码（**必需**） |
-| `TURNSTILE_SITE_KEY` | Turnstile site key（可选） |
-| `TURNSTILE_SECRET_KEY` | Turnstile secret（可选） |
+| 变量名                 | 说明                       |
+| ---------------------- | -------------------------- |
+| `ADMIN_CODE`           | 后台登录密码（**必需**）   |
+| `TURNSTILE_SITE_KEY`   | Turnstile site key（可选） |
+| `TURNSTILE_SECRET_KEY` | Turnstile secret（可选）   |
 
 > Turnstile 不配置会自动跳过，不影响使用。
 
@@ -117,15 +118,15 @@ Settings → Environment variables：
 
 访问 `/admin`，输入 `ADMIN_CODE` 密码登录：
 
-| Tab | 能做什么 |
-|-----|----------|
-| 成员 | 增删改、排序、上传照片 |
-| 日程 | 增删改演出、Markdown 正文编辑器 |
-| 特典 | 编辑规则、上传示例图 |
+| Tab  | 能做什么                                |
+| ---- | --------------------------------------- |
+| 成员 | 增删改、排序、上传照片                  |
+| 日程 | 增删改演出、Markdown 正文编辑器         |
+| 特典 | 编辑规则、上传示例图                    |
 | 站点 | 关于页文案、社交链接、Hero 配置、屏蔽词 |
-| 留言 | 删除不当留言 |
-| 画廊 | 审核粉丝返图、编辑官方精选 |
-| 招募 | 管理首页广告横幅 |
+| 留言 | 删除不当留言                            |
+| 画廊 | 审核粉丝返图、编辑官方精选              |
+| 招募 | 管理首页广告横幅                        |
 
 > 后台修改**即时生效**（写 D1），无需重新构建。
 

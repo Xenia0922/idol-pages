@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from "react";
 
 export interface EventItem {
   id: string;
@@ -9,14 +9,22 @@ export interface EventItem {
 
 /** 拉取公开日程，供广场的「关联场次」下拉与展示用。优先读 window.__SSR_DATA__.events，无 SSR 才 fetch。 */
 export function useEvents() {
-  const ssr = typeof window !== 'undefined' ? (window as any).__SSR_DATA__ : null;
+  const ssr =
+    typeof window !== "undefined" ? (window as any).__SSR_DATA__ : null;
   const ssrEvents: EventItem[] = ssr?.events
-    ? ssr.events.map((e: any) => ({ id: e.id, date: e.date, title: e.title, venue: e.venue }))
+    ? ssr.events.map((e: any) => ({
+        id: e.id,
+        date: e.date,
+        title: e.title,
+        venue: e.venue,
+      }))
     : [];
   const [events, setEvents] = useState<EventItem[]>(
     ssrEvents.length
-      ? [...ssrEvents].sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0))
-      : []
+      ? [...ssrEvents].sort((a, b) =>
+          a.date < b.date ? -1 : a.date > b.date ? 1 : 0,
+        )
+      : [],
   );
   const [loading, setLoading] = useState(ssrEvents.length === 0);
 
@@ -24,18 +32,29 @@ export function useEvents() {
     if (ssrEvents.length) return;
     let alive = true;
     setLoading(true);
-    fetch('/api/events')
+    fetch("/api/events")
       .then((r) => r.json())
       .then((d) => {
         if (alive && Array.isArray(d)) {
-          const list = d.map((e: any) => ({ id: e.id, date: e.date, title: e.title, venue: e.venue }));
-          list.sort((a: EventItem, b: EventItem) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0));
+          const list = d.map((e: any) => ({
+            id: e.id,
+            date: e.date,
+            title: e.title,
+            venue: e.venue,
+          }));
+          list.sort((a: EventItem, b: EventItem) =>
+            a.date < b.date ? -1 : a.date > b.date ? 1 : 0,
+          );
           setEvents(list);
         }
       })
       .catch(() => {})
-      .finally(() => { if (alive) setLoading(false); });
-    return () => { alive = false; };
+      .finally(() => {
+        if (alive) setLoading(false);
+      });
+    return () => {
+      alive = false;
+    };
   }, []);
 
   const map: Record<string, EventItem> = {};
@@ -46,7 +65,7 @@ export function useEvents() {
 
 /** 把日期格式化为「07-04」便于展示。 */
 export function fmtEventDate(date?: string) {
-  if (!date) return '';
-  const [, m, d] = date.split('-');
+  if (!date) return "";
+  const [, m, d] = date.split("-");
   return `${m}-${d}`;
 }

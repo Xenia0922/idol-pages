@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
-import StaticImageLightbox from './StaticImageLightbox';
-import Skeleton from './Skeleton';
+import { useState, useEffect } from "react";
+import StaticImageLightbox from "./StaticImageLightbox";
+import Skeleton from "./Skeleton";
 
 interface EventDetailProps {
   id: string;
@@ -10,19 +10,28 @@ interface EventDetailProps {
   event?: any;
 }
 
-export default function EventDetail({ id, event: eventProp }: EventDetailProps) {
+export default function EventDetail({
+  id,
+  event: eventProp,
+}: EventDetailProps) {
   // 优先：构建期 prop -> 运行时 SSR 注入，二者皆无才回退 fetch
-  const ssr = typeof window !== 'undefined' ? (window as any).__SSR_DATA__ : null;
+  const ssr =
+    typeof window !== "undefined" ? (window as any).__SSR_DATA__ : null;
   const initialEvent = eventProp || (ssr && ssr.event) || null;
 
   const [ev, setEv] = useState<any>(initialEvent);
   const [loading, setLoading] = useState(!initialEvent);
-  const [bodyHtml, setBodyHtml] = useState<string>(initialEvent?.bodyHtml || '');
+  const [bodyHtml, setBodyHtml] = useState<string>(
+    initialEvent?.bodyHtml || "",
+  );
 
   // 更新浏览器标题——覆盖 404 页继承的「404 | 页面未找到」
   useEffect(() => {
-    if (ev && typeof document !== 'undefined') {
-      document.title = ev.title + ' | ' + ((window as any).__SSR_DATA__?.siteConfig?.name || 'Fansite');
+    if (ev && typeof document !== "undefined") {
+      document.title =
+        ev.title +
+        " | " +
+        ((window as any).__SSR_DATA__?.siteConfig?.name || "Fansite");
     }
   }, [ev]);
 
@@ -34,13 +43,13 @@ export default function EventDetail({ id, event: eventProp }: EventDetailProps) 
       return;
     }
     if (!ev.body) {
-      setBodyHtml('');
+      setBodyHtml("");
       return;
     }
-    import('marked').then((mod) => {
+    import("marked").then((mod) => {
       const { marked: parser } = mod;
       const html = (
-        typeof parser.parse === 'function'
+        typeof parser.parse === "function"
           ? parser.parse(ev.body, { async: false })
           : parser(ev.body)
       ) as string;
@@ -51,8 +60,8 @@ export default function EventDetail({ id, event: eventProp }: EventDetailProps) 
   useEffect(() => {
     if (initialEvent) return; // 已有同步数据，无需 fetch
     let alive = true;
-    fetch('/api/events?id=' + encodeURIComponent(id))
-      .then((r) => (r.ok ? r.json() : Promise.reject(new Error('not found'))))
+    fetch("/api/events?id=" + encodeURIComponent(id))
+      .then((r) => (r.ok ? r.json() : Promise.reject(new Error("not found"))))
       .then((d) => {
         if (alive) {
           setEv(d);
@@ -70,23 +79,27 @@ export default function EventDetail({ id, event: eventProp }: EventDetailProps) 
   }, [id]);
 
   if (!ev) {
-    if (loading) return (
-      <div className="max-w-3xl mx-auto px-4 py-12 md:py-16" aria-hidden="true">
-        <Skeleton className="h-4 w-24 rounded-full mb-6" />
-        <div className="flex flex-wrap gap-2 mb-6">
-          <Skeleton className="h-8 w-20 rounded-full" />
-          <Skeleton className="h-8 w-16 rounded-full" />
+    if (loading)
+      return (
+        <div
+          className="max-w-3xl mx-auto px-4 py-12 md:py-16"
+          aria-hidden="true"
+        >
+          <Skeleton className="h-4 w-24 rounded-full mb-6" />
+          <div className="flex flex-wrap gap-2 mb-6">
+            <Skeleton className="h-8 w-20 rounded-full" />
+            <Skeleton className="h-8 w-16 rounded-full" />
+          </div>
+          <Skeleton className="h-8 w-2/3 rounded-full mb-6" />
+          <Skeleton className="w-full aspect-[16/9] rounded-2xl mb-6" />
+          <div className="space-y-3">
+            <Skeleton className="h-3 rounded-full w-full" />
+            <Skeleton className="h-3 rounded-full w-full" />
+            <Skeleton className="h-3 rounded-full w-4/5" />
+            <Skeleton className="h-3 rounded-full w-3/4" />
+          </div>
         </div>
-        <Skeleton className="h-8 w-2/3 rounded-full mb-6" />
-        <Skeleton className="w-full aspect-[16/9] rounded-2xl mb-6" />
-        <div className="space-y-3">
-          <Skeleton className="h-3 rounded-full w-full" />
-          <Skeleton className="h-3 rounded-full w-full" />
-          <Skeleton className="h-3 rounded-full w-4/5" />
-          <Skeleton className="h-3 rounded-full w-3/4" />
-        </div>
-      </div>
-    );
+      );
     return <p className="text-center text-gray-400 py-16">未找到该日程</p>;
   }
 
@@ -117,7 +130,9 @@ export default function EventDetail({ id, event: eventProp }: EventDetailProps) 
         )}
       </div>
 
-      <h1 className="text-2xl md:text-3xl font-extrabold text-gray-900 dark:text-gray-100 mb-2">{ev.title}</h1>
+      <h1 className="text-2xl md:text-3xl font-extrabold text-gray-900 dark:text-gray-100 mb-2">
+        {ev.title}
+      </h1>
 
       {ev.image && (
         <StaticImageLightbox
@@ -128,7 +143,10 @@ export default function EventDetail({ id, event: eventProp }: EventDetailProps) 
         />
       )}
 
-      <div className="event-detail" dangerouslySetInnerHTML={{ __html: bodyHtml }} />
+      <div
+        className="event-detail"
+        dangerouslySetInnerHTML={{ __html: bodyHtml }}
+      />
     </article>
   );
 }
