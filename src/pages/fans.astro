@@ -1,0 +1,193 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import FanUpload from '../components/FanUpload';
+import MessageBoard from '../components/MessageBoard';
+import FanGallery from '../components/FanGallery';
+---
+
+<BaseLayout title="粉丝广场">
+  <section class="max-w-4xl mx-auto px-4 py-12 md:py-20">
+    <div class="text-center mb-10" data-reveal>
+      <p class="section-title-en">✦</p>
+      <h1 class="section-title">粉丝广场</h1>
+      <p class="text-gray-400 mt-2">分享你拍到的现场瞬间，为偶像们应援打 call</p>
+    </div>
+
+    <!-- 标签切换 -->
+    <div class="flex justify-center gap-3 mb-8" id="fan-tabs" role="tablist">
+      <button class="btn-pink text-sm !px-5 !py-2" data-tab="browse" role="tab" aria-selected="true">💬 浏览</button>
+      <button class="btn-outline text-sm !px-5 !py-2" data-tab="post" role="tab" aria-selected="false">✏️ 发布</button>
+    </div>
+
+    <!-- 浏览模式（默认） -->
+    <div id="tab-browse">
+      <!-- 成员筛选（动态生成，来自 middleware 注入的 membersMeta） -->
+      <div id="fan-member-filter" class="flex flex-wrap justify-center gap-2 mb-10">
+        <button class="fan-filter-btn active" data-member="" style="--c: var(--accent)">全部</button>
+      </div>
+      <!-- 场次筛选 -->
+      <div class="flex justify-center mb-10">
+        <select id="fan-event-filter" class="fan-filter-select" aria-label="按场次筛选">
+          <option value="">🎫 全部场次</option>
+        </select>
+      </div>
+      <div class="mb-12" data-reveal>
+        <h2 class="text-lg font-bold text-gray-900 dark:text-gray-100 mb-4">💬 应援留言板</h2>
+        <MessageBoard client:load readonly />
+      </div>
+      <div data-reveal>
+        <h2 class="text-lg font-bold text-gray-900 dark:text-gray-100 mb-4">📸 粉丝返图</h2>
+        <FanGallery client:idle />
+      </div>
+    </div>
+
+    <!-- 发布模式（隐藏） -->
+    <div id="tab-post" class="hidden">
+      <div class="mb-12" data-reveal>
+        <h2 class="text-lg font-bold text-gray-900 dark:text-gray-100 mb-4">✏️ 发留言</h2>
+        <MessageBoard client:idle />
+      </div>
+      <div data-reveal>
+        <h2 class="text-lg font-bold text-gray-900 dark:text-gray-100 mb-4">📸 分享现场照</h2>
+        <FanUpload client:idle />
+      </div>
+      <p class="text-center mt-6 text-[11px] text-gray-400">
+        加入应援会获取最新动态
+      </p>
+    </div>
+  </section>
+</BaseLayout>
+
+<script>
+  const tabs = document.querySelectorAll('#fan-tabs button');
+  const browse = document.getElementById('tab-browse');
+  const post = document.getElementById('tab-post');
+
+  tabs.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const tab = btn.dataset.tab;
+      tabs.forEach(b => { b.className = 'btn-outline text-sm !px-5 !py-2'; b.setAttribute('aria-selected', 'false'); });
+      btn.className = 'btn-pink text-sm !px-5 !py-2';
+      btn.setAttribute('aria-selected', 'true');
+
+      if (tab === 'browse') {
+        browse.classList.remove('hidden');
+        post.classList.add('hidden');
+        window.dispatchEvent(new Event('tab-browse-visible'));
+      } else {
+        browse.classList.add('hidden');
+        post.classList.remove('hidden');
+      }
+    });
+  });
+
+  // 成员筛选：动态生成按钮（来自 SSR membersMeta，无则 fetch 兜底）
+  const filterContainer = document.getElementById('fan-member-filter');
+  if (filterContainer) {
+    function buildMemberButtons(list: any[]) {
+      if (!Array.isArray(list) || !list.length) return;
+      // 清空除"全部"外的按钮
+      const allBtn = filterContainer.querySelector('[data-member=""]');
+      filterContainer.innerHTML = '';
+      if (allBtn) filterContainer.appendChild(allBtn);
+      for (const m of list) {
+        const btn = document.createElement('button');
+        btn.className = 'fan-filter-btn';
+        btn.dataset.member = m.id;
+        btn.style.setProperty('--c', m.color || 'var(--accent)');
+        btn.textContent = `${m.emoji || '⭐'} ${m.name}`;
+        filterContainer.appendChild(btn);
+      }
+      // "其他"按钮（多人/未分类）
+      const otherBtn = document.createElement('button');
+      otherBtn.className = 'fan-filter-btn';
+      otherBtn.dataset.member = 'other';
+      otherBtn.style.setProperty('--c', '#C2417A');
+      otherBtn.textContent = '⭐ 多人·其他';
+      filterContainer.appendChild(otherBtn);
+      // 重新绑定点击事件
+      bindFilterButtons();
+    }
+    function bindFilterButtons() {
+      const btns = filterContainer.querySelectorAll('button');
+      btns.forEach(btn => {
+        btn.onclick = () => {
+          btns.forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          window.dispatchEvent(new CustomEvent('fan-member-filter', { detail: btn.dataset.member }));
+        };
+      });
+    }
+    const ssrMeta = (window as any).__SSR_DATA__?.membersMeta;
+    if (ssrMeta && ssrMeta.length) {
+      buildMemberButtons(ssrMeta);
+    } else {
+      fetch('/api/members')
+        .then(r => r.json())
+        .then(d => { if (Array.isArray(d)) buildMemberButtons(d.filter((m: any) => m.status !== 'graduated')); })
+        .catch(() => {});
+    }
+    bindFilterButtons();
+  }
+
+  // 场次筛选：优先读 SSR 注入，无则 fetch 兜底
+  const evSel = document.getElementById('fan-event-filter');
+  if (evSel) {
+    const sel = evSel as HTMLSelectElement;
+    function fillEvents(list: any[]) {
+      if (!Array.isArray(list)) return;
+      list.sort((a: any, b: any) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0));
+      for (const e of list) {
+        const opt = document.createElement('option');
+        opt.value = e.id;
+        opt.textContent = `🎫 ${e.date} ${e.title}`;
+        sel.appendChild(opt);
+      }
+    }
+    const ssrEvents = (window as any).__SSR_DATA__?.events;
+    if (ssrEvents && ssrEvents.length) {
+      fillEvents(ssrEvents);
+    } else {
+      fetch('/api/events')
+        .then(r => r.json())
+        .then(fillEvents)
+        .catch(() => {});
+    }
+    sel.addEventListener('change', () => {
+      window.dispatchEvent(new CustomEvent('fan-event-filter', { detail: sel.value }));
+    });
+  }
+</script>
+
+<style is:global>
+  .fan-filter-btn {
+    font-size: 0.8125rem; font-weight: 600;
+    padding: 0.4rem 0.95rem; border-radius: 9999px;
+    background: rgba(255, 255, 255, 0.55); color: var(--text-soft);
+    border: 1px solid rgba(20, 14, 40, 0.06);
+    backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+    transition: all 0.2s var(--ease); cursor: pointer;
+  }
+  .fan-filter-btn:hover { color: var(--c); border-color: color-mix(in srgb, var(--c) 35%, transparent); }
+  .fan-filter-btn.active {
+    color: #fff; background: var(--c); border-color: transparent;
+    box-shadow: 0 6px 16px -8px var(--c);
+  }
+  .dark .fan-filter-btn { background: rgba(255, 255, 255, 0.05); color: #a9a4bd; border-color: rgba(255, 255, 255, 0.08); }
+  .dark .fan-filter-btn:hover { color: var(--c); }
+
+  .fan-filter-select {
+    font-size: 0.8125rem; font-weight: 600;
+    padding: 0.45rem 1rem; border-radius: 9999px; max-width: 100%;
+    background: rgba(255, 255, 255, 0.55); color: var(--text-soft);
+    border: 1px solid rgba(20, 14, 40, 0.06);
+    backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+    transition: all 0.2s var(--ease); cursor: pointer;
+    -webkit-appearance: none; appearance: none; padding-right: 2.2rem;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' stroke='%23999' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 0.9rem center;
+  }
+  .fan-filter-select:hover { color: var(--accent); border-color: color-mix(in srgb, var(--accent) 35%, transparent); }
+  .dark .fan-filter-select { background-color: rgba(255, 255, 255, 0.05); color: #a9a4bd; border-color: rgba(255, 255, 255, 0.08); }
+  .dark .fan-filter-select:hover { color: var(--accent); }
+</style>

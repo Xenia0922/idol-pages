@@ -1,0 +1,64 @@
+{
+  "members": [
+    {
+      "id": "member-a",
+      "name": "成员A",
+      "nameJP": "Member A",
+      "color": "#FF6B9D",
+      "emoji": "💗",
+      "birthday": "01-01",
+      "constellation": "摩羯座",
+      "status": "active",
+      "image": "/images/members/member-a/member-a_01.webp",
+      "gallery": [
+        "/images/members/member-a/member-a_01.webp",
+        "/images/members/member-a/member-a_02.webp",
+        "/images/members/member-a/member-a_03.webp"
+      ],
+      "weibo": "",
+      "weiboName": "@成员A",
+      "weiboDesc": "替换为成员的微博简介",
+      "intro": "替换为成员的自我介绍。"
+    },
+    {
+      "id": "member-b",
+      "name": "成员B",
+      "nameJP": "Member B",
+      "color": "#4DA6FF",
+      "emoji": "💙",
+      "birthday": "02-14",
+      "constellation": "水瓶座",
+      "status": "active",
+      "image": "/images/members/member-b/member-b_01.webp",
+      "gallery": [
+        "/images/members/member-b/member-b_01.webp",
+        "/images/members/member-b/member-b_02.webp",
+        "/images/members/member-b/member-b_03.webp"
+      ],
+      "weibo": "",
+      "weiboName": "@成员B",
+      "weiboDesc": "替换为成员的微博简介",
+      "intro": "替换为成员的自我介绍。"
+    },
+    {
+      "id": "member-c",
+      "name": "成员C",
+      "nameJP": "Member C",
+      "color": "#48D1A0",
+      "emoji": "💚",
+      "birthday": "09-04",
+      "constellation": "处女座",
+      "status": "active",
+      "image": "/images/members/member-c/member-c_01.webp",
+      "gallery": [
+        "/images/members/member-c/member-c_01.webp",
+        "/images/members/member-c/member-c_02.webp",
+        "/images/members/member-c/member-c_03.webp"
+      ],
+      "weibo": "",
+      "weiboName": "@成员C",
+      "weiboDesc": "替换为成员的微博简介",
+      "intro": "替换为成员的自我介绍。"
+    }
+  ]
+}

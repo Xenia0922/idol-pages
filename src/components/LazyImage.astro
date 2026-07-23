@@ -1,0 +1,41 @@
+<!-- 图片懒加载 + 模糊渐显 -->
+<style is:global>
+  img.lazy-blur {
+    filter: blur(10px);
+    transition: filter 0.4s ease-out;
+  }
+  img.lazy-blur.loaded {
+    filter: blur(0);
+  }
+  @media (max-width: 767px) {
+    img.lazy-blur { transition-duration: 0.25s; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    img.lazy-blur { transition: none; filter: blur(0); }
+  }
+</style>
+<script>
+  function initLazy(img) {
+    if (img.dataset.lazyInit) return;
+    img.dataset.lazyInit = '1';
+    if (img.complete) {
+      img.classList.add('loaded');
+    } else {
+      img.addEventListener('load', () => img.classList.add('loaded'), { once: true });
+      img.addEventListener('error', () => img.classList.add('loaded'), { once: true });
+    }
+  }
+  // 初始扫描
+  document.querySelectorAll('img.lazy-blur').forEach(initLazy);
+  // 后续动态插入（React 渲染的图片）
+  new MutationObserver(mutations => {
+    mutations.forEach(m => {
+      m.addedNodes.forEach(node => {
+        if (node.nodeType === 1) {
+          if (node.matches?.('img.lazy-blur')) initLazy(node);
+          if (node.querySelectorAll) node.querySelectorAll?.('img.lazy-blur').forEach(initLazy);
+        }
+      });
+    });
+  }).observe(document.body, { childList: true, subtree: true });
+</script>

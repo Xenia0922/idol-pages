@@ -1,0 +1,14 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import AdminPanel from '../components/AdminPanel';
+---
+
+<BaseLayout title="管理后台">
+  <section class="max-w-4xl mx-auto px-4 py-12 md:py-20">
+    <div class="text-center mb-10">
+      <p class="section-title-en">✦</p>
+      <h1 class="section-title">管理后台</h1>
+    </div>
+    <AdminPanel client:load />
+  </section>
+</BaseLayout>

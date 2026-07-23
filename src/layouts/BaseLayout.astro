@@ -1,0 +1,118 @@
+---
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import ScrollFx from '../components/ScrollFx.astro';
+import ColorTheme from '../components/ColorTheme.astro';
+import LazyImage from '../components/LazyImage.astro';
+import RecruitToast from '../components/RecruitToast.astro';
+import site from '../data/site.json';
+import '../styles/globals.css';
+
+interface Props {
+  title?: string;
+  description?: string;
+  image?: string;
+}
+
+const {
+  title,
+  description = site.description,
+  image = site.ogImage,
+} = Astro.props;
+
+const pageTitle = title ? `${title} | ${site.name}` : `${site.name} - 偶像应援站模板`;
+---
+
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" href="/favicon.ico" />
+    
+    <link rel="preload" href="/logo.png" as="image" />
+    <link rel="preload" href="/hero-bg.webp" as="image" fetchpriority="high" />
+    
+    <link rel="canonical" href={new URL(Astro.url.pathname, Astro.site).href} />
+
+    <!-- SEO -->
+    <title>{pageTitle}</title>
+    <meta name="description" content={description} />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={new URL(Astro.url.pathname, Astro.site).href} />
+    <meta property="og:image" content={new URL(image, Astro.site).href} />
+    <meta property="og:site_name" content={site.name} />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <!-- 字体通过国内 CDN 加载，避免 Google Fonts 阻塞 -->
+    <link rel="preconnect" href="https://fonts.loli.net" />
+    <link rel="preconnect" href="https://gstatic.loli.net" crossorigin />
+    <link href="https://fonts.loli.net/css2?family=Noto+Sans+SC:wght@400;500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet" />
+
+    <!-- 防 FOUC：首屏绘制前直接应用已保存的成员色（存的是 hex，无需查表） -->
+    <script is:inline>
+      (function () {
+        try {
+          var c = localStorage.getItem('fansite-accent');
+          if (c) document.documentElement.style.setProperty('--accent', c);
+        } catch (e) {}
+      })();
+    </script>
+
+    <!-- 标记 JS 可用：滚动入场动画 [data-reveal] 的隐藏初始态限定在 .js 作用域，
+         避免 JS 失败/禁用时内容永久不可见（无 JS 兜底） -->
+    <script is:inline>
+      document.documentElement.classList.add('js');
+    </script>
+  </head>
+  <body>
+    <a href="#main" class="skip-link">跳到主内容</a>
+    <div id="page-progress" aria-hidden="true"></div>
+    <Header />
+    <main id="main" class="min-h-screen">
+      <slot />
+    </main>
+    <Footer />
+    <ScrollFx />
+    <ColorTheme />
+    <LazyImage />
+    <RecruitToast />
+
+    <!-- 全局路由加载进度条：内链点击 / 页面加载启动，load 完成收尾。reduced-motion 下由 CSS 隐藏。 -->
+    <script is:inline>
+      (function () {
+        var bar = document.getElementById('page-progress');
+        if (!bar) return;
+        function activate() {
+          bar.classList.remove('is-done');
+          // 重启动画（同一文档内多次激活也生效）
+          bar.classList.remove('is-active');
+          void bar.offsetWidth;
+          bar.classList.add('is-active');
+        }
+        function finish() {
+          bar.classList.remove('is-active');
+          bar.classList.add('is-done');
+          setTimeout(function () { bar.classList.remove('is-done'); }, 600);
+        }
+        // 本页加载即启动（覆盖首屏 + 每次 MPA 导航）
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', activate);
+        } else { activate(); }
+        window.addEventListener('load', finish);
+        // 旧页面点击内链时立即给反馈
+        document.addEventListener('click', function (e) {
+          var a = e.target && e.target.closest ? e.target.closest('a[href]') : null;
+          if (!a) return;
+          var h = a.getAttribute('href') || '';
+          if (h.charAt(0) === '#' || /^https?:/i.test(h) || a.target === '_blank' || a.hasAttribute('download')) return;
+          if (a.origin && a.origin !== location.origin) return;
+          activate();
+        });
+        window.addEventListener('popstate', activate);
+      })();
+    </script>
+  </body>
+</html>

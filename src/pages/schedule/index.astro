@@ -1,0 +1,10 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import scheduleData from '../../data/schedule.json';
+import ScheduleList from '../../components/ScheduleList';
+---
+
+<BaseLayout title="日程">
+  {/* 构建期注入完整列表，静态 HTML 直接含卡片，无占位、无布局跳动；运行时 middleware 再注入最新数据覆盖 */}
+  <ScheduleList client:load initial={scheduleData.events} />
+</BaseLayout>
