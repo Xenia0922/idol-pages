@@ -1,0 +1,1 @@
+import{j as t}from"./jsx-runtime.D_zvdyIk.js";import{E as i}from"./EventCardGrid.BT4bRMTn.js";import"./index.qNTDzdXh.js";import"./eventImages.TrfgdaNt.js";import"./Skeleton.DoWkHF8Z.js";import"./SkeletonSwap.B0EAAAt0.js";function a({initial:r}){return t.jsx(i,{initial:r,filter:"upcoming",sortDir:"asc",limit:4})}export{a as default};

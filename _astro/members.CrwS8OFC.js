@@ -1,0 +1,1 @@
+const r={"member-a":{emoji:"💗",name:"成员A",color:"#FF6B9D"},"member-b":{emoji:"💙",name:"成员B",color:"#4DA6FF"},"member-c":{emoji:"💚",name:"成员C",color:"#48D1A0"},other:{emoji:"⭐",name:"多人·其他",color:"#C2417A"}};function n(o,m){const e=parseInt(o.slice(1),16);return`rgba(${e>>16&255}, ${e>>8&255}, ${e&255}, ${m})`}export{r as M,n as t};
