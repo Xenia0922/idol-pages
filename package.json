@@ -7,6 +7,7 @@
     "dev": "astro dev",
     "start": "astro dev",
     "build": "astro build",
+    "build:gh-pages": "node scripts/build-gh-pages.mjs",
     "preview": "astro preview",
     "build:analyze": "ANALYZE=true astro build",
     "analyze": "bash scripts/analyze-bundle.sh",

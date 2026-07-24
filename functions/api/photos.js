@@ -95,7 +95,7 @@ async function uploadPhoto(request, env) {
     const rawMember = formData.get("member");
     const member = isAdmin
       ? rawMember || "other"
-      : ["hakusai", "kumo", "yuzi", "other"].includes(rawMember)
+      : ["member-a", "member-b", "member-c", "other"].includes(rawMember)
         ? rawMember
         : "other";
     const nickname = formData.get("nickname")?.slice(0, 20) || "匿名粉丝";

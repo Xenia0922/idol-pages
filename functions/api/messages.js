@@ -10,25 +10,40 @@ import {
   json,
   verifyTurnstile,
   containsBlocked,
+  withTable,
 } from "../_shared.js";
 
 export async function onRequest(context) {
   const { request, env } = context;
-  // 旧手动建表补 event 列（幂等，仅首次执行）
+  // 首次请求自动建表并补 event 列（幂等，仅首次执行）
   try {
-    await ensureColumns(env);
+    await ensureTable(env);
   } catch (e) {
     /* 忽略，交由各 handler 处理 */
   }
-  if (request.method === "GET") return listMessages(env);
-  if (request.method === "POST") return postMessage(request, env);
-  if (request.method === "PUT") return editMessage(request, env);
-  if (request.method === "DELETE") return deleteMessage(request, env);
+  if (request.method === "GET")
+    return withTable(env, ensureTable, () => listMessages(env));
+  if (request.method === "POST")
+    return withTable(env, ensureTable, () => postMessage(request, env));
+  if (request.method === "PUT")
+    return withTable(env, ensureTable, () => editMessage(request, env));
+  if (request.method === "DELETE")
+    return withTable(env, ensureTable, () => deleteMessage(request, env));
   return new Response("Method not allowed", { status: 405 });
 }
 
-// messages 表为手动建表，这里补 event 列（部署前已存在的旧表兼容）
-async function ensureColumns(env) {
+// messages 表自动创建（含 event 列）；旧表再补一次 event 列以兼容。
+const DDL = `CREATE TABLE IF NOT EXISTS messages (
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL DEFAULT '匿名粉丝',
+  message TEXT NOT NULL,
+  member TEXT,
+  event TEXT,
+  ip TEXT,
+  created_at TEXT NOT NULL
+);`;
+async function ensureTable(env) {
+  await env.DB.prepare(DDL).run();
   try {
     await env.DB.prepare("ALTER TABLE messages ADD COLUMN event TEXT").run();
   } catch (e) {

@@ -4,9 +4,9 @@ import Turnstile from "./Turnstile";
 
 // 默认成员列表（SSR 未注入时的 fallback）
 const FALLBACK_MEMBERS = [
-  { id: "member-a", emoji: "💗", name: "成员A", color: "#C94D7A" },
-  { id: "member-b", emoji: "💙", name: "成员B", color: "#2F6FED" },
-  { id: "member-c", emoji: "💚", name: "成员C", color: "#1E9E6A" },
+  { id: "member-a", emoji: "💗", name: "成员A", color: "#FF6B9D" },
+  { id: "member-b", emoji: "💙", name: "成员B", color: "#4DA6FF" },
+  { id: "member-c", emoji: "💚", name: "成员C", color: "#48D1A0" },
   { id: "other", emoji: "⭐", name: "多人/其他", color: "#e83e8c" },
 ];
 
